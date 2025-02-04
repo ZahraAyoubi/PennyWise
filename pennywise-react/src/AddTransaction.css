@@ -1,0 +1,64 @@
+.add-button {
+    background: linear-gradient(145deg, #d1d9f0, #f0f8ff);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 4px 4px 8px #bec8e4, -4px -4px 8px #ffffff;
+    color: #4a90e2;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+    .add-button:hover {
+        box-shadow: inset 4px 4px 8px #bec8e4, inset -4px -4px 8px #ffffff;
+    }
+
+.add-transaction-button {
+    background: #22a846;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 4px 4px 8px #bec8e4, -4px -4px 8px #ffffff;
+    color: #000000;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+    .add-transaction-button:hover {
+        box-shadow: inset 4px 4px 8px #bec8e4, inset -4px -4px 8px #ffffff;
+    }
+
+.cancel-button {
+    background: #c91414;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 4px 4px 8px #bec8e4, -4px -4px 8px #ffffff;
+    color: #000000;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-left: 20px;
+}
+
+    .cancel-button:hover {
+        box-shadow: inset 4px 4px 8px #bec8e4, inset -4px -4px 8px #ffffff;
+    }
+
+.label {
+    font-family: "Arial", sans-serif;
+    color: black;
+    margin-bottom: 30px;
+    padding: 0;
+}
+
+.input {
+    font-size: 1.2rem;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    color: #000000;
+    text-align: center;
+    border:none;
+}

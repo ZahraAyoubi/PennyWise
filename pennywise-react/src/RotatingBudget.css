@@ -1,0 +1,15 @@
+﻿.item-container {
+    display: flex;
+    justify-content: space-between; /* Push ❌ to the right */
+    align-items: center; /* Align text & button vertically */
+    width: 100%;
+}
+
+.delete-button {
+    font-size: 12px;
+    padding: 2px 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: red;
+}

@@ -1,0 +1,47 @@
+.editable-textbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif, ;
+}
+
+.textbox-value {
+    font-size: 1.2rem;
+    padding: 5px 60px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    color: #000000;
+}
+
+.edit-button,
+.save-button {
+    border: none;
+    background: #4caf50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.edit-button {
+    background: #007bff;
+}
+
+    .edit-button:hover {
+        background: #0056b3;
+    }
+
+.save-button:hover {
+    background: #45a049;
+}
+
+.textbox-input {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100px;
+}

@@ -1,0 +1,18 @@
+.value {
+    font-size: 1.2rem;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    color: #000000;
+    text-align :center;
+}
+.mounth-button {
+    background: linear-gradient(145deg, #d1d9f0, #f0f8ff);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 4px 4px 8px #bec8e4, -4px -4px 8px #ffffff;
+    color: #4a90e2;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
