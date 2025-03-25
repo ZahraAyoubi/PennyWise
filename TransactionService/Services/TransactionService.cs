@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TransactionService.Data;
 using TransactionService.IServices;
 using TransactionService.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TransactionService.Services;
 
@@ -16,16 +13,24 @@ public class TransactionService : ITransactionService
     {
         _context = context;
     }
-    public async Task<Transaction> GetIncomeAsync(DateTime date)
+    public async Task<decimal> GetIncomeAsync(DateTime date, string userID)
     {
         var mounth = date.Month;
         var year = date.Year;
+        decimal amount = 0;
         var transaction = await _context.Transactions.OrderByDescending(d => d.Date)
-                             .Where(t => t.Type == "Income" && 
-                             t.Date.Month == mounth && t.Date.Year == year)
+                             .Where(t => t.Type == "Income" &&
+                             t.Date.Month == mounth && t.Date.Year == year
+                             && t.UserId.ToString().Equals(userID))
                              .FirstOrDefaultAsync();
-        return transaction;
+        if (transaction != null)
+        {
+            amount = transaction.Amount;
+        }
+
+        return amount;
     }
+
     public async Task<Transaction> AddIncomeAsync(Transaction transaction)
     {
         if (transaction == null)
@@ -34,6 +39,9 @@ public class TransactionService : ITransactionService
         {
             await _context.Transactions.AddAsync(transaction);
             await _context.SaveChangesAsync();
+
+            //UserEventConsumer consumer = new UserEventConsumer();
+            //await consumer.StartListening();
             return transaction;
         }
         catch (Exception ex)
@@ -76,12 +84,13 @@ public class TransactionService : ITransactionService
         throw new NotImplementedException();
     }
 
-    public async Task<decimal> GetTotalExpensesAsync(DateTime date)
+    public async Task<decimal> GetTotalExpensesAsync(DateTime date, string userId)
     {
         var mounth = date.Month;
         var year = date.Year;
         var amount = await _context.Transactions
-            .Where(t => t.Type == "Expense" && t.Date.Month == date.Month && t.Date.Year == date.Year)
+            .Where(t => t.Type == "Expense" && t.Date.Month == date.Month && t.Date.Year == date.Year
+            && t.UserId.ToString().Equals(userId))           
             .SumAsync(t=> t.Amount);
 
         return amount;
@@ -107,7 +116,7 @@ public class TransactionService : ITransactionService
         throw new NotImplementedException();
     }
 
-    public async Task<decimal> GetRamainingBudgetAsync(DateTime date)
+    public async Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId)
     {
         var mounth = date.Month;
         var year = date.Year;
@@ -115,11 +124,14 @@ public class TransactionService : ITransactionService
 
         var income = await _context.Transactions.OrderByDescending(d => d.Date)
                              .Where(t => t.Type == "Income" &&
-                             t.Date.Month == mounth && t.Date.Year == year)
+                             t.Date.Month == mounth && t.Date.Year == year
+                             && t.UserId.ToString().Equals(userId))
                              .FirstOrDefaultAsync();
 
         var expenses = await _context.Transactions
-            .Where(t => t.Type == "Expense" && t.Date.Month == mounth && t.Date.Year == year)
+            .Where(t => t.Type == "Expense" && t.Date.Month == mounth 
+            && t.Date.Year == year
+            && t.UserId.ToString().Equals(userId))
             .SumAsync(t => t.Amount);
 
         if (income != null)
@@ -130,14 +142,15 @@ public class TransactionService : ITransactionService
         return amount;
     }
 
-    public async Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date)
+    public async Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId)
     {
         var mounth = date.Month;
         var year = date.Year;
 
         var transactions = await _context.Transactions
             .Where(t=> t.Type == "Expense" 
-            && t.Date.Month == date.Month && t.Date.Year == date.Year)
+            && t.Date.Month == date.Month && t.Date.Year == date.Year
+            && t.UserId.ToString().Equals(userId))
             .ToListAsync();
 
         return transactions;

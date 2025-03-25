@@ -3,12 +3,12 @@ import Modal from './Modal';
 import PropTypes from 'prop-types';
 import '../AddTransaction.css';
 
-const AddTransaction = ({ onTransactionAdded }) => {
+const AddTransaction = ({ onTransactionAdded, user }) => {
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
     const [showModal, setShowModal] = useState(false);
-
+    const userId = user.id;
     const handleSubmit = async (e) => {
         e.preventDefault();
         setDate(new Date().toISOString())
@@ -17,7 +17,7 @@ const AddTransaction = ({ onTransactionAdded }) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ amount, description,date }),
+            body: JSON.stringify({ amount, description, date, userId }),
         });
 
         if (response.ok) {
@@ -70,7 +70,8 @@ const AddTransaction = ({ onTransactionAdded }) => {
 };
 
 AddTransaction.propTypes = {
-    onTransactionAdded: PropTypes.func.isRequired
+    onTransactionAdded: PropTypes.func.isRequired,
+    user: PropTypes.object
 };
 
 export default AddTransaction;

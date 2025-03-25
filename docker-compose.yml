@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: "mssql"
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - backend
+    restart: always
+
+  userservice:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+    container_name: "userservice"
+    depends_on:
+      - mssql
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Zahra;Database=User;Trusted_Connection=True;TrustServerCertificate=True;
+    ports:
+      - "5046:80"
+    networks:
+      - backend
+
+  transactionservice:
+    build:
+      context: .
+      dockerfile: TransactionService/Dockerfile
+    container_name: "transactionservice"
+    depends_on:
+      - mssql
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Zahra;Database=Transaction;Trusted_Connection=True;TrustServerCertificate=True;
+    ports:
+      - "5259:80"
+    networks:
+      - backend
+
+networks:
+  backend:

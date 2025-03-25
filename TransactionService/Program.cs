@@ -1,8 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 using TransactionService.Data;
 using TransactionService.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHealthChecks()
+    .AddRabbitMQ(sp =>
+    {
+        var factory = new ConnectionFactory()
+        {
+            Uri = new Uri("amqp://guest:guest@localhost:5672") // Set RabbitMQ URI
+        };
+        return factory.CreateConnectionAsync(); // Return IConnection
+    }, name: "rabbitmq");
 
 builder.Services.AddControllers(); // For API controllers, if applicable
 
@@ -26,6 +37,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.MapHealthChecks("/health");
 
 // Enable Swagger in development or all environments
 if (app.Environment.IsDevelopment())

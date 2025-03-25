@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TransactionService.Data;
 
 #nullable disable
@@ -11,7 +12,7 @@ using TransactionService.Data;
 namespace TransactionService.Migrations
 {
     [DbContext(typeof(TransactionDbContext))]
-    [Migration("20250121084001_InitialCreate")]
+    [Migration("20250310081804_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,18 +20,16 @@ namespace TransactionService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("TransactionService.Models.Transaction", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -47,6 +46,9 @@ namespace TransactionService.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

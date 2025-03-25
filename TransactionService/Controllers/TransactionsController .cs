@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TransactionService.IServices;
 using TransactionService.Models;
 
@@ -35,34 +34,34 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("Income/{date}")]
-    public async Task<IActionResult> GetIncome(DateTime date)
+    [Route("Income/{date}/{userId}")]
+    public async Task<IActionResult> GetIncome(DateTime date, string userId)
     {
-        var transaction = await _transactionService.GetIncomeAsync(date);
+        var transaction = await _transactionService.GetIncomeAsync(date, userId);
         return CreatedAtAction(nameof(GetIncome), transaction);
     }
 
     [HttpGet]
-    [Route("TotalExpenses/{date}")]
-    public async Task<IActionResult> GetTotalExpenses(DateTime date)
+    [Route("TotalExpenses/{date}/{userId}")]
+    public async Task<IActionResult> GetTotalExpenses(DateTime date, string userId)
     {
-        var amount = await _transactionService.GetTotalExpensesAsync(date);
+        var amount = await _transactionService.GetTotalExpensesAsync(date, userId);
         return CreatedAtAction(nameof(GetTotalExpenses), amount);
     }
 
     [HttpGet]
-    [Route("RamainingBudget/{date}")]
-    public async Task<IActionResult> GetRamainingBudget(DateTime date)
+    [Route("RamainingBudget/{date}/{userId}")]
+    public async Task<IActionResult> GetRamainingBudget(DateTime date, string userId)
     {
-        var amount = await _transactionService.GetRamainingBudgetAsync(date);
+        var amount = await _transactionService.GetRamainingBudgetAsync(date, userId);
         return CreatedAtAction(nameof(GetRamainingBudget), amount);
     }
 
     [HttpGet]
-    [Route("RotatingBudget/{date}")]
-    public async Task<IActionResult> GetRotatingBudget(DateTime date)
+    [Route("RotatingBudget/{date}/{userId}")]
+    public async Task<IActionResult> GetRotatingBudget(DateTime date, string userId)
     {
-        var amount = await _transactionService.GetRotatingBudgetAsync(date);
+        var amount = await _transactionService.GetRotatingBudgetAsync(date, userId);
         return CreatedAtAction(nameof(GetRotatingBudget), amount);
     }
     [HttpDelete]

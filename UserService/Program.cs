@@ -1,34 +1,89 @@
+﻿using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
+using UserService.Data;
+using UserService.IRepositories;
+using UserService.IServices;
+using UserService.Repositories;
+using UserService.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddHealthChecks()
+    .AddRabbitMQ(sp =>
+    {
+        var factory = new ConnectionFactory()
+        {
+            Uri = new Uri("amqp://guest:guest@localhost:5672") // Set RabbitMQ URI
+        };
+        return factory.CreateConnectionAsync(); // Return IConnection
+    }, name: "rabbitmq");
+
+builder.Services.AddControllers();
+
+// Configure Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure SQL database context
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+
+//var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!);
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+//            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+//            IssuerSigningKey = new SymmetricSecurityKey(key)
+//        };
+//    });
+
+// Enable CORS for React App
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:49222")  // React's URL
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.MapHealthChecks("/health");
+
+// Enable Swagger UI
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+
+// Use CORS
+app.UseCors("AllowReactApp");
+
+
+// Configure middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

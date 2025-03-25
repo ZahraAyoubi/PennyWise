@@ -1,97 +1,124 @@
-import { useState, useEffect } from "react";
-import AddTransaction from "./AddTransaction";
-import EditableTextbox from "./EditableTextbox ";
-import RotatingBudget from "./RotatingBudget";
+﻿import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "./Header";
+import Dashboard from "./Dashboard";
 import '../TotalExpense.css';
+import '../Overview.css'
 
 const Overview = () => {
+    //const initialUser = localStorage.getItem("user");
+
     const [income, setIncome] = useState(0);
     const [totalExpenses, setTotalExpenses] = useState(0);
     const [remainingBudget, setRemainingBudget] = useState(0);
     const [rotatingBudget, setRotatingBudget] = useState([]);
-    const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [showProfile, setShowProfile] = useState(false);
+    const [user, setUser] = useState(() => {
+        const storedUser = localStorage.getItem("user");
+        return storedUser ? JSON.parse(storedUser) : {}; // Default to empty object if null
+    });
+    const [profile, setProfile] = useState(null);
+    const navigate = useNavigate();
+    const userId = user.id;
 
-    // Handle deleting a rotating budget item
+    const fetchData = async () => {
+        if (userId == null) {
+            console.warn("User not found, skipping data fetch.");
+            return;
+        }
+        try {
+     //       console.log(user);
+            const incomeResponse = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, { method: "GET", });
+            const expensesResponse = await fetch(`http://localhost:5259/api/transactions/TotalExpenses/${date}/${userId}`, { method: "GET", });
+            const budgetResponse = await fetch(`http://localhost:5259/api/transactions/RamainingBudget/${date}/${userId}`, { method: "GET", });
+            const rotatingResponse = await fetch(`http://localhost:5259/api/transactions/RotatingBudget/${date}/${userId}`, { method: "GET", });
+
+            setIncome(await incomeResponse.json());
+            setTotalExpenses(await expensesResponse.json());
+            setRemainingBudget(await budgetResponse.json());
+            setRotatingBudget(await rotatingResponse.json());
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
     const handleDeleteRotatingItem = async (itemId) => {
         try {
-            // Send DELETE request
-            const response = await fetch(`http://localhost:5259/api/transactions/DeleteRotatingBudget/${itemId}`, {
-         
-                method: "DELETE",
-            });
-            console.log("ItemID:" ,itemId);
-            if (!response.ok) {
-                throw new Error(`Error deleting item: ${response.status}`);
-            }
-
-            console.log("Item deleted successfully");
-
+            const response = await fetch(`http://localhost:5259/api/transactions/DeleteRotatingBudget/${itemId}`, { method: "DELETE" });
+            if (!response.ok) throw new Error(`Error deleting item: ${response.status}`);
             fetchData();
         } catch (error) {
             console.error("Error deleting item:", error);
         }
     };
-    const fetchData = async () => {
-        try {
-            const incomeResponse = await fetch(`http://localhost:5259/api/transactions/Income/${date}`);
-            const expensesResponse = await fetch(`http://localhost:5259/api/transactions/TotalExpenses/${date}`);
-            const budgetResponse = await fetch(`http://localhost:5259/api/transactions/RamainingBudget/${date}`);
-            const rotatingResponse = await fetch(`http://localhost:5259/api/transactions/RotatingBudget/${date}`);
 
-            const incomeData = await incomeResponse.json();
-            const expensesData = await expensesResponse.json();
-            const budgetData = await budgetResponse.json();
-            const rotatingData = await rotatingResponse.json();
-
-            setIncome(incomeData.amount);
-            setTotalExpenses(expensesData);
-            setRemainingBudget(budgetData);
-            setRotatingBudget(Array.isArray(rotatingData) ? rotatingData : rotatingData || []); 
-        } catch (error) {
-            console.error("Error fetching data:", error);
+    const getProfile = async () => {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser) {
+            const response = await fetch(`http://localhost:5046/api/profile/${storedUser.email}`);
+            const data = await response.json();
+            setProfile(data.name || "N/A");
         }
     };
+
+    //useEffect(() => {
+    //    //const storedUser = JSON.parse(localStorage.getItem("user"));
+    //    const storedUser = localStorage.getItem("user");
+    //    if (storedUser) {
+    //        setUser(JSON.parse(storedUser));
+    //    }
+    //    console.log(storedUser);
+    //    if (storedUser) {
+    //        //setUser(storedUser);
+    //        setUser(JSON.parse(storedUser));
+    //        getProfile();
+    //    }
+    //    fetchData();
+    //}, [date, user]);
+
     useEffect(() => {
-        fetchData();
-    }, [date]);
+        const storedUser = localStorage.getItem("user");
+
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser); // ✅ Now we're using setUser
+                getProfile();
+            } catch (error) {
+                console.error("Error parsing stored user:", error);
+                setUser(null);
+            }
+            fetchData();
+        }
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch("http://localhost:5046/api/user/logout", { method: "POST", headers: { "Content-Type": "application/json" } });
+            if (response.ok) {
+                localStorage.removeItem("user");
+                navigate("/");
+            }
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+    };
+
     return (
         <div className="app">
-            <h1 className="header">PennyWise</h1>
-            <div className="dashboard">
-                <div className="card overview">
-                    <h2>Income</h2>
-                    <EditableTextbox
-                        fetchData={fetchData} date={date} />
-                    <h2>Total Expenses</h2>
-                    <div className="value">
-                        {totalExpenses}
-                    </div>
-                    <h2>Remaining Budget</h2>                    
-                    <div className="value">
-                        {remainingBudget}
-                    </div>
-                </div>
-                <div className="card rotating-budget">
-                    <h2>Automated payments list</h2>
-                    <button>Add</button>
-                </div>
-                <div className="card add-transaction">
-                    <h2>Rotating Budget</h2>
-                    <RotatingBudget rotatingBudget={rotatingBudget} onDelete={handleDeleteRotatingItem} />
-                </div>
-                <div className="card add-transaction">
-                    <h2>Add Transaction</h2>
-                    <AddTransaction onTransactionAdded={fetchData} />
-                </div>
-
-                <div className="card add-transaction">
-                    <h2>History</h2>
-                    <div >
-                        <input className="mounth-button" type="date" value={date}
-                            onChange={(e) => setDate(e.target.value) } />
-                    </div>                   
-                </div>
-            </div>           
+            <Header onLogout={handleLogout} user={user} showProfile={showProfile} setShowProfile={setShowProfile} profile={profile} />
+            <Dashboard
+                totalExpenses={totalExpenses}
+                remainingBudget={remainingBudget}
+                income={income}
+                date={date}
+                setDate={setDate}
+                rotatingBudget={rotatingBudget}
+                onDelete={handleDeleteRotatingItem}
+                fetchData={fetchData}
+                user={user}
+            />
         </div>
     );
 };

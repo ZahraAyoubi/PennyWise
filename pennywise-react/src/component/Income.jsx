@@ -1,18 +1,31 @@
 ﻿/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import '../EditableTextbox.css';
+import '../Income.css';
 
-const EditableTextbox = ({ fetchData, date }) => {
-    const [amount, setAmount] = useState(0); // State for the textbox value
+const Income = ({ income, date, user }) => {
+    if (!user) {
+        console.error("User is null in Income");
+    }
+
+    const [amount, setAmount] = useState(income); // State for the textbox value
     const [isEditing, setIsEditing] = useState(false);
-
+    //console.log('income:',income);
+    //console.log('amount:', amount)
+    const userId = user ? user.id : null;
+    if (!userId) {
+        console.error("User is null in Income");
+    }
+        
     useEffect(() => {
         const fetchCurrentIncome = async () => {
             try {
-                const response = await fetch(`http://localhost:5259/api/transactions/Income/${date}`, { method: "GET" }); 
+                //const response = await fetch(`http://localhost:5259/api/transactions/Income/${date} ?${userId}`, { method: "GET" });
+                const response = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, {method: "GET",});
+
+                console.log(response);
                 const data = await response.json();
-                setAmount(data.amount); // Assuming the API returns { income: value }
+                setAmount(data); // Assuming the API returns { income: value }
             } catch (error) {
                 console.error('Error fetching income:', error);
             }
@@ -32,11 +45,11 @@ const EditableTextbox = ({ fetchData, date }) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ amount, description, date }),
+                body: JSON.stringify({ amount, description, date, userId } ),
                 
             }); 
-            fetchData();
-            console.log(" Data:", { amount, description, date }); 
+            //fetchData();
+            console.log(" Data:", { amount, description, date, user }); 
         } catch (error) {
             console.error('Error saving income:', error);
         }
@@ -73,9 +86,10 @@ const EditableTextbox = ({ fetchData, date }) => {
     );
 };
 
-EditableTextbox.propTypes = {
-    fetchData: PropTypes.func.isRequired,
-    date: PropTypes.string.isRequired
+Income.propTypes = {
+    income: PropTypes.number.isRequired,
+    date: PropTypes.string.isRequired,
+    user: PropTypes.object
 };
 
-export default EditableTextbox;
+export default Income;

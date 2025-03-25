@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportingService", "Reporti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedLibraries", "SharedLibraries", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "Frontend\frontend.esproj", "{462EE049-9FE1-B47D-1B3E-22BACA5D9185}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,8 +42,17 @@ Global
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {46839B67-18AE-4C9D-A35B-187D09DD45F2}
 	EndGlobalSection
 EndGlobal

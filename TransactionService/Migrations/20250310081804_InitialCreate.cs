@@ -15,12 +15,12 @@ namespace TransactionService.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
