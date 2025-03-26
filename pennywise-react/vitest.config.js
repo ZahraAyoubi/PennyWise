@@ -1,23 +1,14 @@
-﻿//import { defineConfig } from 'vitest/config';
-
-//export default defineConfig({
-//    test: {
-//        globals: true,  // Enables global `describe`, `test`, `expect`
-//        environment: "jsdom",  // Ensures React components can be tested
-//        setupFiles: "./setupTests.js", // ✅ Optional: Centralize setup
-//    },
-//});
-import { defineConfig } from "vitest/config";
+﻿import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     test: {
-        globals: true,  // ✅ Enables global `describe`, `test`, `expect`
-        environment: "jsdom",  // ✅ Ensures React components can be tested
-        setupFiles: "./setupTests.js", // ✅ Centralize setup
+        globals: true,  
+        environment: "jsdom",  
+        setupFiles: "./setupTests.js", 
         coverage: {
-            provider: "v8",  // Optional: Enables coverage reporting
+            provider: "v8",  
             reporter: ["text", "lcov"]
         },
-        threads: false,  // Optional: Disable for better debugging
+        threads: false,  
     },
 });
