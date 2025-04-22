@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using TransactionService.Data;
 using TransactionService.IServices;
+using TransactionService.IRepositories;
+using TransactionService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,7 @@ builder.Services.AddDbContext<TransactionDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITransactionService, TransactionService.Services.TransactionService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 // Enable CORS for React App
 builder.Services.AddCors(options =>

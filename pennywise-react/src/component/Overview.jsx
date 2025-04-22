@@ -6,12 +6,7 @@ import '../TotalExpense.css';
 import '../Overview.css'
 
 const Overview = () => {
-    //const initialUser = localStorage.getItem("user");
-
     const [income, setIncome] = useState(0);
-    const [totalExpenses, setTotalExpenses] = useState(0);
-    const [remainingBudget, setRemainingBudget] = useState(0);
-    const [rotatingBudget, setRotatingBudget] = useState([]);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [showProfile, setShowProfile] = useState(false);
     const [user, setUser] = useState(() => {
@@ -28,16 +23,10 @@ const Overview = () => {
             return;
         }
         try {
-     //       console.log(user);
-            const incomeResponse = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, { method: "GET", });
-            const expensesResponse = await fetch(`http://localhost:5259/api/transactions/TotalExpenses/${date}/${userId}`, { method: "GET", });
-            const budgetResponse = await fetch(`http://localhost:5259/api/transactions/RamainingBudget/${date}/${userId}`, { method: "GET", });
-            const rotatingResponse = await fetch(`http://localhost:5259/api/transactions/RotatingBudget/${date}/${userId}`, { method: "GET", });
+            const incomeResponse = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, { method: "GET", });          
 
             setIncome(await incomeResponse.json());
-            setTotalExpenses(await expensesResponse.json());
-            setRemainingBudget(await budgetResponse.json());
-            setRotatingBudget(await rotatingResponse.json());
+
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -58,24 +47,10 @@ const Overview = () => {
         if (storedUser) {
             const response = await fetch(`http://localhost:5046/api/profile/${storedUser.email}`);
             const data = await response.json();
-            setProfile(data.name || "N/A");
+            setProfile(data.profile.name || "N/A");
+            localStorage.setItem("profile", JSON.stringify(data.profile)); 
         }
     };
-
-    //useEffect(() => {
-    //    //const storedUser = JSON.parse(localStorage.getItem("user"));
-    //    const storedUser = localStorage.getItem("user");
-    //    if (storedUser) {
-    //        setUser(JSON.parse(storedUser));
-    //    }
-    //    console.log(storedUser);
-    //    if (storedUser) {
-    //        //setUser(storedUser);
-    //        setUser(JSON.parse(storedUser));
-    //        getProfile();
-    //    }
-    //    fetchData();
-    //}, [date, user]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -83,8 +58,9 @@ const Overview = () => {
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser); // ✅ Now we're using setUser
+                setUser(parsedUser); 
                 getProfile();
+
             } catch (error) {
                 console.error("Error parsing stored user:", error);
                 setUser(null);
@@ -109,12 +85,9 @@ const Overview = () => {
         <div className="app">
             <Header onLogout={handleLogout} user={user} showProfile={showProfile} setShowProfile={setShowProfile} profile={profile} />
             <Dashboard
-                totalExpenses={totalExpenses}
-                remainingBudget={remainingBudget}
                 income={income}
                 date={date}
                 setDate={setDate}
-                rotatingBudget={rotatingBudget}
                 onDelete={handleDeleteRotatingItem}
                 fetchData={fetchData}
                 user={user}

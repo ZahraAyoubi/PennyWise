@@ -2,24 +2,27 @@ import { useState, useEffect } from 'react';
 import '../TotalExpense.css';
 import PropTypes from 'prop-types';
 
-const TotalExpense = ({ apiGetUrl }) => {
+const TotalExpense = ({ date, user }) => {
     const [value, setValue] = useState(0); // State for the textbox value
-
-    // Fetch current income when the component loads
+    const userId = user ? user.id : null;
+    if (!userId) {
+        console.error("User is null ");
+    }
+    
     useEffect(() => {
         const fetchTotalExpens = async () => {
             try {
-                const response = await fetch(apiGetUrl, { method: "Get" }); // API call to fetch the current value
+                const response = await fetch(`http://localhost:5259/api/transactions/TotalExpenses/${date}/${userId}`, { method: "Get" }); // API call to fetch the current value
                 
                 const expensesData = await response.json();
-                setValue(expensesData); // Assuming the API returns { income: value }
+                setValue(expensesData); 
             } catch (error) {
-                console.error('Error fetching income:', error);
+                console.error('Error fetching total expenses:', error);
             }
         };
 
         fetchTotalExpens();
-    }, [apiGetUrl]); // Runs only once when the component mounts
+    }, [date]); 
 
     return (
             <div className="value">
@@ -29,7 +32,8 @@ const TotalExpense = ({ apiGetUrl }) => {
 };
 
 TotalExpense.propTypes = {
-    apiGetUrl: PropTypes.string.isRequired
+    date: PropTypes.string.isRequired,
+    user: PropTypes.object
 };
 
 export default TotalExpense;

@@ -33,6 +33,15 @@ public class TransactionsController : ControllerBase
         return CreatedAtAction(nameof(AddIncome), new { id = createdTransaction.Id }, createdTransaction);
     }
 
+    //[HttpPost]
+    //[Route("AddFixedBudget")]
+    //public async Task<IActionResult> AddFixedBudget([FromBody] Transaction transaction)
+    //{
+    //    transaction.Type = "Expense";
+    //    var createdTransaction = await _transactionService.AddIncomeAsync(transaction);
+    //    return CreatedAtAction(nameof(AddIncome), new { id = createdTransaction.Id }, createdTransaction);
+    //}
+
     [HttpGet]
     [Route("Income/{date}/{userId}")]
     public async Task<IActionResult> GetIncome(DateTime date, string userId)
@@ -64,6 +73,15 @@ public class TransactionsController : ControllerBase
         var amount = await _transactionService.GetRotatingBudgetAsync(date, userId);
         return CreatedAtAction(nameof(GetRotatingBudget), amount);
     }
+
+    [HttpGet]
+    [Route("FixedBudget/{date}/{userId}")]
+    public async Task<IActionResult> GetFixedBudget(DateTime date, string userId)
+    {
+        var amount = await _transactionService.GetFixedBudgetAsync(date, userId);
+        return CreatedAtAction(nameof(GetFixedBudget), amount);
+    }
+
     [HttpDelete]
     [Route("DeleteRotatingBudget/{id}")]
     public async Task<IActionResult> DeleteRotatingBudget( int id)

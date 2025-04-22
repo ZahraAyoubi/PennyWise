@@ -1,13 +1,23 @@
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 const ProfileDropdown = ({ user, profile, setShowProfile }) => {
+    const navigate = useNavigate();
+
+    const handleEdit = () => {
+        navigate("/EditProfile");
+    }
+
     return (
         <div className="profile-dropdown">
             <h3>Profile: {profile}</h3>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Description:</strong> {user.description}</p>
             <p><strong>Role:</strong> {user.role}</p>
-            <button onClick={() => setShowProfile(false)}>Close</button>
+            <div>
+                <button className="cancel-button" onClick={() => setShowProfile(false)}>Close</button>
+                <button className="add-transaction-button" onClick={handleEdit}>Edit</button>
+            </div>
         </div>
     );
 };

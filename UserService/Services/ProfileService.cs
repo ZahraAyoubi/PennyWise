@@ -20,4 +20,12 @@ public class ProfileService : IProfileService
         var profile = await _repository.GetProfileByEmail(email);
         return profile;
     }
+
+    public async Task<bool> UpdateProfile(Profile profile)
+    {
+        //var oldProfile = await _repository.GetProfileByyId(profile.Id);
+        await _repository.UpdateProfile(profile);
+
+        return true;
+    }
 }

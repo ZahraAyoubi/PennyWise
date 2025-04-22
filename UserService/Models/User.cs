@@ -11,8 +11,7 @@ public class User
     [Required]
     public string Password { get; set; }
     public string PasswordHash { get; set; }
+    public string Salt { get; set; }
     public DateTime CreatedAt { get; set; }
-    [Required]
-    public string PasswordConfirmed { get; set; }
     public string Phone { get; set; }
 }

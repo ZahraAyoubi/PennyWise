@@ -1,8 +1,8 @@
 ﻿using TransactionService.Models;
 
-namespace TransactionService.IServices;
+namespace TransactionService.IRepositories;
 
-public interface ITransactionService
+public interface ITransactionRepository
 {
     Task<Transaction> AddTransactionAsync(Transaction transaction);
     Task<Transaction> AddIncomeAsync(Transaction transaction);
@@ -11,9 +11,5 @@ public interface ITransactionService
     Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId);
     Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId);
     Task<IEnumerable<Transaction>> GetFixedBudgetAsync(DateTime date, string userId);
-    Task<Transaction> GetTransactionByIdAsync(int id);
-    Task<bool> UpdateTransactionAsync(int id, Transaction updatedTransaction);
     Task<bool> DeleteTransactionAsync(int id);
-    Task<decimal> GetTotalIncomeAsync();
-    Task<IEnumerable<Transaction>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate);
 }

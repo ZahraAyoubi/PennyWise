@@ -10,8 +10,6 @@ const Income = ({ income, date, user }) => {
 
     const [amount, setAmount] = useState(income); // State for the textbox value
     const [isEditing, setIsEditing] = useState(false);
-    //console.log('income:',income);
-    //console.log('amount:', amount)
     const userId = user ? user.id : null;
     if (!userId) {
         console.error("User is null in Income");

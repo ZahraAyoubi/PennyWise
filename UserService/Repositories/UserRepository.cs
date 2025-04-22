@@ -4,30 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.IRepositories;
 using UserService.Models;
+using System.Text;
 
 namespace UserService.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly UserDbContext _context;
-    private readonly IConfiguration _config;
-    public UserRepository(UserDbContext context, IConfiguration config)
+    public UserRepository(UserDbContext context)
     {
         _context = context;
-        _config = config;
-    }
-
-    public async Task<bool> CreateProfile(User user)
-    {
-        var profile = new Profile
-        {
-            User = user
-        };
-
-        await _context.Profiles.AddAsync(profile);
-        await _context.SaveChangesAsync();
-
-        return true;
     }
 
     public async Task<List<User>> GetAll()
@@ -46,20 +32,37 @@ public class UserRepository : IUserRepository
 
     public async Task<User> Login(string email, string password)
     {
-        //|| !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)
-        //var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email) && u.Password.Equals(password));
-        //if (user == null) return null;
+        //try
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
+        //    if (user == null) return null;
 
-        //return user;
+        //    var hashedInput = HashedPassword(password);
 
+        //    if (hashedInput == user.PasswordHash)
+        //    {
+        //        return user;
+        //    }
+
+        //    return null;
+        //}
+        //catch (Exception ex)
+        //{
+        //    throw new ApplicationException("An error occurred while trying to log in.", ex);
+        //}
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email) && u.Password.Equals(password));
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null) return null;
 
-            return user;
+            if (VerifyPassword(password, user.PasswordHash, user.Salt))
+            {
+                return user;
+            }
+
+            return null;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new ApplicationException("An error occurred while trying to log in.", ex);
         }
@@ -67,15 +70,33 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> Register(User user)
     {
-        string hashedPassword = HashedPassword(user.Password);
+        //string hashedPassword = HashedPassword(user.Password);
+        //user.PasswordHash = hashedPassword;
+        //user.CreatedAt = DateTime.UtcNow;
+
+        //await _context.Users.AddAsync(user);
+        //await _context.SaveChangesAsync();
+
+        //return true;
+
+        // Generate a random salt
+        var salt = GenerateSalt();
+
+        // Hash the password with the salt
+        string hashedPassword = HashPasswordWithSalt(user.Password, salt);
+
+        // Set properties
         user.PasswordHash = hashedPassword;
+        user.Salt = salt;
         user.CreatedAt = DateTime.UtcNow;
 
+        // Store in DB
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
         return true;
     }
+
 
     private string HashedPassword(string password)
     {
@@ -92,20 +113,31 @@ public class UserRepository : IUserRepository
             numBytesRequested: 32));
     }
 
-    //private string GenerateJwtToken(User user)
-    //{
-    //    var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]!);
-    //    var tokenHandler = new JwtSecurityTokenHandler();
-    //    var tokenDescriptor = new SecurityTokenDescriptor
-    //    {
-    //        Subject = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Email, user.Email) }),
-    //        Expires = DateTime.UtcNow.AddHours(1),
-    //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256),
-    //        Issuer = _config["JwtSettings:Issuer"],
-    //        Audience = _config["JwtSettings:Audience"]
-    //    };
+    private bool VerifyPassword(string password, string storedHash, string storedSalt)
+    {
+        var hashedInput = HashPasswordWithSalt(password, storedSalt);
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(hashedInput),
+            Encoding.UTF8.GetBytes(storedHash)
+        );
+    }
 
-    //    var token = tokenHandler.CreateToken(tokenDescriptor);
-    //    return tokenHandler.WriteToken(token);
-    //}
+    public static string HashPasswordWithSalt(string password, string salt)
+    {
+        var saltBytes = Encoding.UTF8.GetBytes(salt);
+        var passwordBytes = Encoding.UTF8.GetBytes(password);
+
+        using var pbkdf2 = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 100000, HashAlgorithmName.SHA256);
+        var hashBytes = pbkdf2.GetBytes(32); // 256-bit hash
+
+        return Convert.ToBase64String(hashBytes);
+    }
+
+    private string GenerateSalt(int size = 32)
+    {
+        var rng = new RNGCryptoServiceProvider();
+        var buffer = new byte[size];
+        rng.GetBytes(buffer);
+        return Convert.ToBase64String(buffer);
+    }
 }

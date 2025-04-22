@@ -1,8 +1,4 @@
-﻿using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.EntityFrameworkCore;
-using UserService.Data;
-using UserService.IRepositories;
+﻿using UserService.IRepositories;
 using UserService.IServices;
 using UserService.Models;
 
@@ -10,22 +6,24 @@ namespace UserService.Services;
 
 public class UserServices : IUserServices
 {
-    private readonly IUserRepository _repository;
+    private readonly IUserRepository _userRepo;
+    private readonly IProfileRepository _profileRepo;
 
-    public UserServices(IUserRepository repository)
+    public UserServices(IUserRepository userRepo, IProfileRepository profileRepo)
     {
-        _repository = repository;
+        _userRepo = userRepo;
+        _profileRepo = profileRepo;
     }
 
     public async Task<User> Login(string email, string password)
     {
-        var user = await _repository.Login(email, password);
+        var user = await _userRepo.Login(email, password);
 
         return user;
     }
     public async Task<List<User>> GetAll()
     {
-        var user = await _repository.GetAll();
+        var user = await _userRepo.GetAll();
         return user;
     }
     public async Task<bool> Register(User user)
@@ -35,20 +33,17 @@ public class UserServices : IUserServices
             throw new ArgumentNullException(nameof(user));
         }
 
-
-
-        var existingUser = await _repository.GetUserByEmail(user.Email);
+        var existingUser = await _userRepo.GetUserByEmail(user.Email.ToLower());
         if (existingUser != null)
         {
             return false;
         }
 
-        await _repository.Register(user);
+        user.Email = user.Email.ToLower();
 
-        await _repository.CreateProfile(user);
+        await _userRepo.Register(user);
 
-        //UserEventPublisher rabbit = new UserEventPublisher();
-        //await rabbit.PublishUserCreatedEvent(user.Id, user.Email);
+        await _profileRepo.CreateProfile(user);
 
         return true;
     }

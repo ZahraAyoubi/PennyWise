@@ -74,16 +74,36 @@
     }
 
     .profile-dropdown button {
-        background: #ff4d4d;
         color: white;
         border: none;
         padding: 5px 10px;
         cursor: pointer;
         border-radius: 3px;
         margin-top: 10px;
-        width: 100%;
+        margin-right: 10px;
+        margin-left: 10px;
+        width: 40%;
     }
 
-        .profile-dropdown button:hover {
-            background: #cc0000;
-        }
+/* Red button */
+.btn-red {
+    background: #cc0000;
+}
+
+/* Green button */
+.btn-green {
+    background: #45a049;
+}
+
+.dropdown {
+    position: absolute;
+    left: 0;
+    top: 100%; /* this is what 'top-full' means in Tailwind */
+    margin-top: 0.5rem; /* mt-2 in Tailwind (8px) */
+    background-color: white;
+    padding: 1rem; /* p-4 in Tailwind (16px) */
+    border: 1px solid #e5e7eb; /* border - Tailwind uses light gray by default */
+    border-radius: 0.5rem; /* rounded in Tailwind (8px) */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    z-index: 10;
+}

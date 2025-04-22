@@ -3,28 +3,24 @@ import IncomeOverview from "./IncomeOverview";
 import AddTransaction from "./AddTransaction"
 import RotatingBudgetList from "./RotatingBudgetList";
 import TransactionHistory from "./TransactionHistory";
+import FixedBudget from "./FixedBudget";
 
-const Dashboard = ({ totalExpenses, remainingBudget, income, date, setDate, rotatingBudget, onDelete, fetchData, user }) => {
+const Dashboard = ({  income, date, setDate, onDelete, fetchData, user }) => {
     return (
         <div className="dashboard">
-            <IncomeOverview totalExpenses={totalExpenses} remainingBudget={remainingBudget} income={income} date={date} user={user } />
-            <RotatingBudgetList rotatingBudget={rotatingBudget} onDelete={onDelete} />
-            <div className="card add-transaction">
-                <h2>Add Transaction</h2>
-                <AddTransaction onTransactionAdded={fetchData} user={user } />
-            </div>
+            <IncomeOverview  income={income} date={date} user={user } />
+            <RotatingBudgetList onDelete={onDelete} date={date} user={user} />
+            <FixedBudget onTransactionAdded={fetchData}  onDelete={onDelete}  user={user} />
+            <AddTransaction onTransactionAdded={fetchData} user={user} />
             <TransactionHistory date={date} setDate={setDate} />
         </div>
     );
 };
 
 Dashboard.propTypes = {
-    totalExpenses: PropTypes.number.isRequired,
-    remainingBudget: PropTypes.number.isRequired,
     income: PropTypes.number.isRequired,
     date: PropTypes.string.isRequired,
     setDate: PropTypes.func.isRequired,
-    rotatingBudget: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     fetchData: PropTypes.func.isRequired,
     user: PropTypes.object

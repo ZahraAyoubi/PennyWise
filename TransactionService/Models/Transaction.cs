@@ -11,4 +11,5 @@ public class Transaction
     public DateTime Date { get; set; }
     //public Profile Profile_Id { get; set; }
     public Guid UserId { get; set; }
+    public bool IsFixed { get; set; }
 }

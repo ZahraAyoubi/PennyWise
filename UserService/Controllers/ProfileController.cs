@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserService.IServices;
 using UserService.Models;
+using UserService.Services;
 
 namespace UserService.Controllers;
 
@@ -19,7 +20,13 @@ public class ProfileController : ControllerBase
     public async Task<IActionResult> GetProfileByEmail(string email)
     {
         var profile = await _profileService.GetProfileByEmail(email);
-        //return CreatedAtAction(nameof(GetProfileByEmail), profile);
         return Ok(new { profile });
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateProfile([FromBody] Profile profile)
+    {
+        await _profileService.UpdateProfile(profile);
+        return Ok(new { message = "Profile updated successfully" });
     }
 }
