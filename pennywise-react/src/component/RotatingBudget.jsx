@@ -1,14 +1,15 @@
 ﻿import '../RotatingBudget.css';
 import PropTypes from 'prop-types';
 
-const RotatingBudget = ({ rotatingBudget, onDelete }) => {
+const RotatingBudget = ({ rotatingBudget , onDelete }) => {
+
     return (
         <ul>
             {rotatingBudget.map((item) => (
                 <li key={item.id} >
                 <div className="item-container">
                     <strong>{item.description}</strong>: {item.amount}sek
-                    <button onClick={() => onDelete(item.id, item.amount)} className="delete-button" >
+                    <button onClick={() => onDelete(item.id)} className="delete-button" >
                         ❌ 
                         </button>
                     </div>
@@ -20,7 +21,7 @@ const RotatingBudget = ({ rotatingBudget, onDelete }) => {
 
 RotatingBudget.propTypes = {
     rotatingBudget: PropTypes.array.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 export default RotatingBudget;

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import '../TotalExpense.css';
 import PropTypes from 'prop-types';
 
-const TotalExpense = ({ date, user }) => {
-    const [value, setValue] = useState(0); // State for the textbox value
+const TotalExpense = ({  date, user, refreshTrigger }) => {
+    const [value, setValue] = useState(0); 
     const userId = user ? user.id : null;
     if (!userId) {
         console.error("User is null ");
@@ -22,7 +22,7 @@ const TotalExpense = ({ date, user }) => {
         };
 
         fetchTotalExpens();
-    }, [date]); 
+    }, [refreshTrigger]); 
 
     return (
             <div className="value">
@@ -33,7 +33,8 @@ const TotalExpense = ({ date, user }) => {
 
 TotalExpense.propTypes = {
     date: PropTypes.string.isRequired,
-    user: PropTypes.object
+    user: PropTypes.object,
+    refreshTrigger: PropTypes.number.isRequired
 };
 
 export default TotalExpense;

@@ -4,12 +4,11 @@ namespace TransactionService.IRepositories;
 
 public interface ITransactionRepository
 {
-    Task<Transaction> AddTransactionAsync(Transaction transaction);
     Task<Transaction> AddIncomeAsync(Transaction transaction);
     Task<decimal> GetIncomeAsync(DateTime date, string userId);
     Task<decimal> GetTotalExpensesAsync(DateTime date, string userId);
     Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId);
-    Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId);
-    Task<IEnumerable<Transaction>> GetFixedBudgetAsync(DateTime date, string userId);
-    Task<bool> DeleteTransactionAsync(int id);
+    Task<List<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId);
+    Task<List<Transaction>> GetFixedBudgetAsync(DateTime date, string userId);
+    Task<bool> DeleteTransactionAsync(string id);
 }

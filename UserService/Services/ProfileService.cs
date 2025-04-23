@@ -17,14 +17,14 @@ public class ProfileService : IProfileService
         if (email == null)
             return null;
 
-        var profile = await _repository.GetProfileByEmail(email);
+        var profile = await _repository.GetProfileByEmailAsync(email);
         return profile;
     }
 
     public async Task<bool> UpdateProfile(Profile profile)
     {
-        //var oldProfile = await _repository.GetProfileByyId(profile.Id);
-        await _repository.UpdateProfile(profile);
+        //var oldProfile = await _repository.GetProfileByIdAsync(profile.Id);
+        await _repository.UpdateProfileAsync(profile);
 
         return true;
     }

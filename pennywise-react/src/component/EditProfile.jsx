@@ -11,7 +11,7 @@ const EditProfile = () => {
 
     const [profile, setProfile] = useState(() => {
         const storedProfile = localStorage.getItem("profile");
-        return storedProfile ? JSON.parse(storedProfile) : {}; 
+        return storedProfile ? JSON.parse(storedProfile) : {};
     });
 
     const [description, setDescription] = useState(profile.description);
@@ -23,7 +23,7 @@ const EditProfile = () => {
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser); 
+                setUser(parsedUser);
                 console.log(user)
             } catch (error) {
                 console.error("Error parsing stored user:", error);
@@ -35,7 +35,6 @@ const EditProfile = () => {
         if (storedProfile) {
             try {
                 const parsedProfile = JSON.parse(storedProfile);
-                //parsedProfile.description = description;
                 setProfile(parsedProfile);
                 setDescription(parsedProfile.description);
                 setProfileName(parsedProfile.name);
@@ -55,20 +54,19 @@ const EditProfile = () => {
         }));
     }, [description, profileName]);
 
-    // Handle cancel button click
     const handleCancel = () => {
         navigate("/Overview");
     };
 
 
-    const handleEdit = async () => {     
+    const handleEdit = async () => {
         try {
             const response = await fetch("http://localhost:5046/api/profile", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify( profile ),
+                body: JSON.stringify(profile),
             });
             if (response.ok) {
                 // Successfully updated, navigate to Overview page
@@ -88,7 +86,7 @@ const EditProfile = () => {
                     <label className="label">Profile:</label>
                     <input type="text" className="input"
                         value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}                    />
+                        onChange={(e) => setProfileName(e.target.value)} />
                 </div>
 
                 <div className="input-group">

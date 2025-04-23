@@ -1,19 +1,21 @@
+import React from "react";
 import { useState } from 'react';
 import Modal from './Modal';
 import PropTypes from 'prop-types';
 import '../AddTransaction.css';
 
-const AddTransaction = ({ onTransactionAdded, user }) => {
+const AddTransaction = ({  user, onRefresh}) => {
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
-    const [date, setDate] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isFixed, setIsFixed] = useState(false);
 
     const userId = user.id;
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setDate(new Date().toISOString())
+
+        const date = new Date().toISOString(); 
+
         const response = await fetch("http://localhost:5259/api/transactions/createtransaction", {
             method: "POST",
             headers: {
@@ -24,9 +26,9 @@ const AddTransaction = ({ onTransactionAdded, user }) => {
 
         if (response.ok) {
             setShowModal(false);
-            setAmount(""); // Clear input
+            setAmount("");
             setDescription("");
-            onTransactionAdded(); // Fetch new data immediately
+            onRefresh();
             setIsFixed(false);
         } else {
             console.error("Failed to add transaction");
@@ -46,16 +48,20 @@ const AddTransaction = ({ onTransactionAdded, user }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="label">
                         <div>
-                            <label>Description: </label>
-                            <input className="input"
+                            <label htmlFor="description">Description:</label>
+                            <input
+                                id="description"
+                                className="input"
                                 type="text"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label>Amount: </label>
-                            <input className="input"
+                            <label htmlFor="amount">Amount:</label>
+                            <input
+                                id="amount"
+                                className="input"
                                 type="number"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
@@ -74,7 +80,7 @@ const AddTransaction = ({ onTransactionAdded, user }) => {
                     </div>
                     <div>
                         <button className="add-transaction-button" type="submit">
-                            Add Transaction
+                            Add
                         </button>
 
                         <button className="cancel-button" onClick={() => setShowModal(false)}>
@@ -89,7 +95,7 @@ const AddTransaction = ({ onTransactionAdded, user }) => {
 };
 
 AddTransaction.propTypes = {
-    onTransactionAdded: PropTypes.func.isRequired,
+    onRefresh: PropTypes.func.isRequired,
     user: PropTypes.object
 };
 

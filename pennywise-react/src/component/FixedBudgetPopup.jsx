@@ -1,15 +1,13 @@
 ﻿import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import "../Overview.css";
 
-const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDelete }) => {
+const FixedBudgetPopup = ({ setShowFixedbudget, user, onDelete ,refreshTrigger, onRefresh}) => {
     const [items, setItems] = useState([]);
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
     const [editIndex, setEditIndex] = useState(null);
 
-    //const [value, setValue] = useState([]); // State for the textbox value
     const userId = user ? user.id : null;
     if (!userId) {
         console.error("User is null ");
@@ -28,44 +26,21 @@ const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDele
         });
 
         if (response.ok) {
-            setAmount(""); // Clear input
+            setAmount("");
             setDescription("");
-            onTransactionAdded(); // Fetch new data immediately
+            onRefresh();
         } else {
             console.error("Failed to add transaction");
         }
     };
 
-    //const handleAdd = () => {
-    //    if (newItem.trim() === "") return;
-    //    if (editIndex !== null) {
-    //        const updated = [...items];
-    //        updated[editIndex] = newItem;
-    //        setItems(updated);
-    //        setEditIndex(null);
-    //    } else {
-    //        setItems([...items, newItem]);
-    //    }
-    //    setNewItem("");
-    //};
-
-    //const handleEdit = (index) => {
-    //    setNewItem(items[index]);
-    //    setEditIndex(index);
-    //};
-
-    //const handleRemove = (index) => {
-    //    const updated = items.filter((_, i) => i !== index);
-    //    setItems(updated);
-    //};
-
     useEffect(() => {
         if (!userId) return; // Don't fetch if userId is not available
 
-        const currentDate = new Date().toISOString().split("T")[0]; // Format as YYYY-MM-DD
-        setDate(currentDate);
-
         const fetchFixedBudget = async () => {
+            const currentDate = new Date().toISOString().split("T")[0];
+            setDate(currentDate)
+
             try {
                 const response = await fetch(`http://localhost:5259/api/transactions/FixedBudget/${currentDate}/${userId}`, { method: "GET" });
 
@@ -81,7 +56,8 @@ const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDele
         };
 
         fetchFixedBudget();
-    }, []); // Trigger only when userId is available
+
+    }, [ refreshTrigger]);
 
     return (
         <div className="dropdwon">
@@ -91,7 +67,7 @@ const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDele
                     <li key={item.id} >
                         <div className="item-container">
                             <strong>{item.description}</strong>: {item.amount}sek
-                            <button onClick={() => onDelete(item.id, item.amount)} className="delete-button" >
+                            <button onClick={() => onDelete(item.id)} className="delete-button" >
                                 ❌
                             </button>
                         </div>
@@ -113,7 +89,7 @@ const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDele
                     className="input"
                     placeholder="Amount"
                 />
-                <button type="submit" className="add-transaction-button">
+                <button  type="submit" className="add-transaction-button">
                     {editIndex !== null ? "Update" : "Add"}
                 </button>
                 <button onClick={() => setShowFixedbudget(false)} className="cancel-button">Close</button>
@@ -124,10 +100,11 @@ const FixedBudgetPopup = ({ onTransactionAdded, setShowFixedbudget, user, onDele
 };
 
 FixedBudgetPopup.propTypes = {
-    onTransactionAdded: PropTypes.func.isRequired,
     setShowFixedbudget: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
-    user: PropTypes.object
+    user: PropTypes.object,
+    refreshTrigger: PropTypes.number.isRequired,
+    onRefresh: PropTypes.func.isRequired
 };
 
 export default FixedBudgetPopup;

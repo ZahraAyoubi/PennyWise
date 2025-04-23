@@ -4,8 +4,8 @@ namespace UserService.IRepositories;
 
 public interface IProfileRepository
 {
-    Task<bool> CreateProfile(User user);
-    Task<Profile> GetProfileByEmail(string email);
-    Task<Profile> GetProfileByyId(Guid id);
-    Task<bool> UpdateProfile(Profile profile);
+    Task<bool> CreateProfileAsync(User user, CancellationToken cancellationToken = default);
+    Task<Profile> GetProfileByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<Profile> GetProfileByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> UpdateProfileAsync(Profile profile, CancellationToken cancellationToken = default);
 }

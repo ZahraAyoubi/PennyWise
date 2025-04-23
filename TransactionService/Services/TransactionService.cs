@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TransactionService.Data;
-using TransactionService.IRepositories;
+﻿using TransactionService.IRepositories;
 using TransactionService.IServices;
 using TransactionService.Models;
 
@@ -29,7 +27,7 @@ public class TransactionService : ITransactionService
         return await _repository.AddIncomeAsync(transaction);
     }
 
-    public async Task<bool> DeleteTransactionAsync(int id)
+    public async Task<bool> DeleteTransactionAsync(string id)
     {
         return await _repository.DeleteTransactionAsync(id);
     }
@@ -37,26 +35,6 @@ public class TransactionService : ITransactionService
     public async Task<decimal> GetTotalExpensesAsync(DateTime date, string userId)
     {
         return await _repository.GetTotalExpensesAsync(date, userId);
-    }
-
-    public Task<decimal> GetTotalIncomeAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Transaction> GetTransactionByIdAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IEnumerable<Transaction>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> UpdateTransactionAsync(int id, Transaction updatedTransaction)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId)

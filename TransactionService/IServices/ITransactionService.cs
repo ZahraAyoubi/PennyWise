@@ -11,9 +11,5 @@ public interface ITransactionService
     Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId);
     Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId);
     Task<IEnumerable<Transaction>> GetFixedBudgetAsync(DateTime date, string userId);
-    Task<Transaction> GetTransactionByIdAsync(int id);
-    Task<bool> UpdateTransactionAsync(int id, Transaction updatedTransaction);
-    Task<bool> DeleteTransactionAsync(int id);
-    Task<decimal> GetTotalIncomeAsync();
-    Task<IEnumerable<Transaction>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate);
+    Task<bool> DeleteTransactionAsync(string id);
 }

@@ -5,12 +5,22 @@ services:
     image: "mcr.microsoft.com/mssql/server:2022-latest"
     container_name: "mssql"
     environment:
+      SA_PASSWORD: "YourStrongPassword123"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
     networks:
       - backend
-    restart: always
+    # restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - backend
 
   userservice:
     build:
@@ -19,6 +29,7 @@ services:
     container_name: "userservice"
     depends_on:
       - mssql
+      - rabbitmq
     environment:
       - ConnectionStrings__DefaultConnection=Server=Zahra;Database=User;Trusted_Connection=True;TrustServerCertificate=True;
     ports:
@@ -33,6 +44,7 @@ services:
     container_name: "transactionservice"
     depends_on:
       - mssql
+      - rabbitmq
     environment:
       - ConnectionStrings__DefaultConnection=Server=Zahra;Database=Transaction;Trusted_Connection=True;TrustServerCertificate=True;
     ports:

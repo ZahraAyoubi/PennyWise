@@ -15,36 +15,31 @@ public class UserServices : IUserServices
         _profileRepo = profileRepo;
     }
 
-    public async Task<User> Login(string email, string password)
-    {
-        var user = await _userRepo.Login(email, password);
+    public async Task<User> Login(string email, string password)=>
+        await _userRepo.LoginAsync(email, password);
 
-        return user;
-    }
-    public async Task<List<User>> GetAll()
-    {
-        var user = await _userRepo.GetAll();
-        return user;
-    }
-    public async Task<bool> Register(User user)
+    public async Task<List<User>> GetAll() =>
+        await _userRepo.GetAsync();
+
+    public async Task<User> Register(User user)
     {
        if (user == null)
         {
             throw new ArgumentNullException(nameof(user));
         }
 
-        var existingUser = await _userRepo.GetUserByEmail(user.Email.ToLower());
+        var existingUser = await _userRepo.GetUserByEmailAsync(user.Email.ToLower());
         if (existingUser != null)
         {
-            return false;
+            return null;
         }
 
         user.Email = user.Email.ToLower();
 
-        await _userRepo.Register(user);
+        await _userRepo.RegisterAsync(user);
 
-        await _profileRepo.CreateProfile(user);
+        await _profileRepo.CreateProfileAsync(user);
 
-        return true;
+        return user;
     }
 }

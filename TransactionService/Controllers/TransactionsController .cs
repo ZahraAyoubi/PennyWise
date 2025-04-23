@@ -9,10 +9,12 @@ namespace TransactionService.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly ITransactionService _transactionService;
+    //private readonly ILogger<TransactionsController> _logger;
 
     public TransactionsController(ITransactionService transactionService)
     {
         _transactionService = transactionService;
+        //_logger = logger;
     }
 
     [HttpPost]
@@ -32,15 +34,6 @@ public class TransactionsController : ControllerBase
         var createdTransaction = await _transactionService.AddIncomeAsync(transaction);
         return CreatedAtAction(nameof(AddIncome), new { id = createdTransaction.Id }, createdTransaction);
     }
-
-    //[HttpPost]
-    //[Route("AddFixedBudget")]
-    //public async Task<IActionResult> AddFixedBudget([FromBody] Transaction transaction)
-    //{
-    //    transaction.Type = "Expense";
-    //    var createdTransaction = await _transactionService.AddIncomeAsync(transaction);
-    //    return CreatedAtAction(nameof(AddIncome), new { id = createdTransaction.Id }, createdTransaction);
-    //}
 
     [HttpGet]
     [Route("Income/{date}/{userId}")]
@@ -84,7 +77,7 @@ public class TransactionsController : ControllerBase
 
     [HttpDelete]
     [Route("DeleteRotatingBudget/{id}")]
-    public async Task<IActionResult> DeleteRotatingBudget( int id)
+    public async Task<IActionResult> DeleteRotatingBudget(string id)
     {
         var deleteTransaction = await _transactionService.DeleteTransactionAsync(id);
         return CreatedAtAction(nameof(DeleteRotatingBudget), id);

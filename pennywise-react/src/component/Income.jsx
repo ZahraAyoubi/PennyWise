@@ -1,5 +1,4 @@
-﻿/* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import '../Income.css';
 
@@ -8,31 +7,29 @@ const Income = ({ income, date, user }) => {
         console.error("User is null in Income");
     }
 
-    const [amount, setAmount] = useState(income); // State for the textbox value
+    const [amount, setAmount] = useState(income);
     const [isEditing, setIsEditing] = useState(false);
     const userId = user ? user.id : null;
     if (!userId) {
         console.error("User is null in Income");
     }
-        
+
     useEffect(() => {
         const fetchCurrentIncome = async () => {
             try {
-                //const response = await fetch(`http://localhost:5259/api/transactions/Income/${date} ?${userId}`, { method: "GET" });
-                const response = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, {method: "GET",});
+                const response = await fetch(`http://localhost:5259/api/transactions/Income/${date}/${userId}`, { method: "GET", });
 
                 console.log(response);
                 const data = await response.json();
-                setAmount(data); // Assuming the API returns { income: value }
+                setAmount(data);
             } catch (error) {
                 console.error('Error fetching income:', error);
             }
         };
 
         fetchCurrentIncome();
-    }, [date]); 
+    }, [date]);
 
-    // Save updated value to the database
     const handleSave = async () => {
         setIsEditing(false);
         const date = new Date().toISOString();
@@ -43,11 +40,9 @@ const Income = ({ income, date, user }) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ amount, description, date, userId } ),
-                
-            }); 
-            //fetchData();
-            console.log(" Data:", { amount, description, date, user }); 
+                body: JSON.stringify({ amount, description, date, userId }),
+            });
+
         } catch (error) {
             console.error('Error saving income:', error);
         }
@@ -68,8 +63,8 @@ const Income = ({ income, date, user }) => {
                     </button>
                 </div>
             ) : (
-                    <div className="view-mode">
-                        <span className="textbox-value">{amount}</span>
+                <div className="view-mode">
+                    <span className="textbox-value">{amount}</span>
                     <button
                         className="edit-button"
                         onClick={() => setIsEditing(true)}
@@ -79,7 +74,7 @@ const Income = ({ income, date, user }) => {
                     </button>
                 </div>
             )}
-           
+
         </div>
     );
 };

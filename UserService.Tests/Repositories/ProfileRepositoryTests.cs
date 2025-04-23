@@ -30,11 +30,11 @@ public class ProfileRepositoryTests
     public async Task CreateProfile_ShouldAddProfile()
     {
         var user = new User { Email = "new@user.com" };
-        await _userRepo.Register(user); // add user
+        await _userRepo.RegisterAsync(user); // add user
 
-        var result = await _profilRrepo.CreateProfile(user);
+        var result = await _profilRrepo.CreateProfileAsync(user);
 
-        var profile = await _profilRrepo.GetProfileByEmail("new@user.com");
+        var profile = await _profilRrepo.GetProfileByEmailAsync("new@user.com");
 
         Assert.True(result);
         Assert.NotNull(profile);

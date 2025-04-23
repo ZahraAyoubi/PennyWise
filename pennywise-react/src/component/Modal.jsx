@@ -1,3 +1,4 @@
+import React from "react";
 import '../Modal.css';
 import PropTypes from 'prop-types';
 
@@ -14,11 +15,10 @@ const Modal = ({ show, onClose, children }) => {
     );
 };
 
-// PropTypes validation
 Modal.propTypes = {
-    show: PropTypes.bool.isRequired,  // 'show' should be a boolean
-    onClose: PropTypes.func.isRequired,  // 'onClose' should be a function
-    children: PropTypes.node.isRequired,  // 'children' can be any node (React elements)
+    show: PropTypes.bool.isRequired, 
+    onClose: PropTypes.func.isRequired,  
+    children: PropTypes.node.isRequired,  
 };
 
 

@@ -22,7 +22,7 @@ function Register () {
             });
             
         if (response.ok) {
-            setEmail(""); // Clear input
+            setEmail(""); 
             setPassword("");
             setPasswordConfirmed("");
             setName(""); 

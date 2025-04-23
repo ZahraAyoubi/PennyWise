@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import '../TotalExpense.css';
 import PropTypes from 'prop-types';
 
-const RemainingBudget = ({ date, user }) => {
-    const [value, setValue] = useState(0); // State for the textbox value
+const RemainingBudget = ({ refreshTrigger, date, user, onDelete }) => {
+    const [value, setValue] = useState(0); 
     const userId = user ? user.id : null;
     if (!userId) {
         console.error("User is null ");
     }
-    // Fetch current income when the component loads
+
     useEffect(() => {
         const fetchCurrentIncome = async () => {
             try {
@@ -21,7 +21,7 @@ const RemainingBudget = ({ date, user }) => {
         };
 
         fetchCurrentIncome();
-    }, [date]); // Runs only once when the component mounts
+    }, [date, refreshTrigger, onDelete]); 
 
     return (
         <div className="value">
@@ -31,6 +31,8 @@ const RemainingBudget = ({ date, user }) => {
 };
 
 RemainingBudget.propTypes = {
+    refreshTrigger: PropTypes.number.isRequired,
+    onDelete: PropTypes.func.isRequired,
     date: PropTypes.string.isRequired,
     user: PropTypes.object
 };

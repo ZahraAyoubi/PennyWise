@@ -5,19 +5,24 @@ using TransactionService.Models;
 
 namespace TransactionService.Repositories;
 
-public class TransactionRepository:ITransactionRepository
+public class TransactionRepository : ITransactionRepository
 {
     private readonly TransactionDbContext _context;
+    private readonly ILogger<TransactionRepository> _logger;
 
-    public TransactionRepository(TransactionDbContext context)
+    public TransactionRepository(TransactionDbContext context, ILogger<TransactionRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Transaction> AddIncomeAsync(Transaction transaction)
     {
         if (transaction == null)
+        {
             throw new ArgumentNullException(nameof(transaction));
+        }
+
         try
         {
             await _context.Transactions.AddAsync(transaction);
@@ -27,123 +32,169 @@ public class TransactionRepository:ITransactionRepository
         }
         catch (Exception ex)
         {
-            throw ex.InnerException;
+            _logger.LogError(ex, "Error adding income transaction for UserId: {UserId}, Amount: {Amount}", transaction.UserId, transaction.Amount);
+            throw;
         }
     }
 
-    public async Task<Transaction> AddTransactionAsync(Transaction transaction)
+    public async Task<List<Transaction>> GetFixedBudgetAsync(DateTime date, string userId)
     {
-        if (transaction == null)
-            throw new ArgumentNullException(nameof(transaction));
+        var userGuid = ParseUserId(userId);
+        var (startDate, endDate) = GetMonthRange(date);
+
         try
         {
-            await _context.Transactions.AddAsync(transaction);
-            await _context.SaveChangesAsync();
-            return transaction;
+            return await _context.Transactions
+                             .Where(t => t.Type == "Expense"
+                                 && t.Date >= startDate
+                                 && t.Date < endDate
+                                 && t.UserId == userGuid
+                                 && t.IsFixed)
+                            .ToListAsync();
         }
+
         catch (Exception ex)
         {
-            throw ex.InnerException;
+            _logger.LogError(ex, "Error getting fixed budget for UserId: {UserId}", userId);
+            throw;
         }
-    }
-
-    public async Task<bool> DeleteTransactionAsync(int id)
-    {
-        var item = await _context.Transactions.FindAsync(id);
-        if (item == null)
-        {
-            return false;
-        }
-        var result = _context.Remove(item);
-        await _context.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<IEnumerable<Transaction>> GetFixedBudgetAsync(DateTime date, string userId)
-    {
-        var mounth = date.Month;
-        var year = date.Year;
-
-        var transactions = await _context.Transactions
-            .Where(t => t.Type == "Expense"
-            && t.Date.Month == date.Month && t.Date.Year == date.Year
-            && t.UserId.ToString().Equals(userId)
-            && t.IsFixed)
-            .ToListAsync();
-
-        return transactions;
     }
 
     public async Task<decimal> GetIncomeAsync(DateTime date, string userId)
     {
-        var month = date.Month;
-        var year = date.Year;
-        decimal amount = 0;
-        var transaction = await _context.Transactions.OrderByDescending(d => d.Date)
-                             .Where(t => t.Type == "Income" &&
-                             t.Date.Month == month && t.Date.Year == year
-                             && t.UserId.ToString().Equals(userId))
-                             .FirstOrDefaultAsync();
+        var userGuid = ParseUserId(userId);
+        var (startDate, endDate) = GetMonthRange(date);
 
-        if (transaction != null)
+        try
         {
-            amount = transaction.Amount;
+            var transaction = await _context.Transactions.OrderByDescending(d => d.Date)
+                                 .Where(t => t.Type == "Income"
+                                  && t.Date >= startDate
+                                  && t.Date < endDate
+                                  && t.UserId == userGuid)
+                                 .FirstOrDefaultAsync();
+
+            if (transaction != null)
+            {
+                return transaction.Amount;
+            }
+
+            return 0;
         }
 
-        return amount;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting income for UserId: {UserId}", userId);
+            throw;
+        }
     }
 
     public async Task<decimal> GetRamainingBudgetAsync(DateTime date, string userId)
     {
-        var mounth = date.Month;
-        var year = date.Year;
-        decimal amount = 0;
+        var userGuid = ParseUserId(userId);
+        var (startDate, endDate) = GetMonthRange(date);
 
-        var income = await _context.Transactions.OrderByDescending(d => d.Date)
-                             .Where(t => t.Type == "Income" &&
-                             t.Date.Month == mounth && t.Date.Year == year
-                             && t.UserId.ToString().Equals(userId))
-                             .FirstOrDefaultAsync();
-
-        var expenses = await _context.Transactions
-            .Where(t => t.Type == "Expense" && t.Date.Month == mounth
-            && t.Date.Year == year
-            && t.UserId.ToString().Equals(userId))
-            .SumAsync(t => t.Amount);
-
-        if (income != null)
+        try
         {
-            amount = income.Amount - expenses;
+            var result = await _context.Transactions
+                            .Where(t => t.Date >= startDate
+                            && t.Date < endDate
+                            && t.UserId == userGuid)
+                            .GroupBy(t => 1)
+                            .Select(g => new
+                            {
+                                Income = g.OrderByDescending(d => d.Date).Where(t => t.Type == "Income").FirstOrDefault().Amount,
+                                TotalExpenses = g.Where(t => t.Type == "Expense").Sum(t => t.Amount)
+                            })
+                            .FirstOrDefaultAsync();
+            return result?.Income - result?.TotalExpenses ?? 0;
         }
 
-        return amount;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting remaining budget for UserId: {UserId}", userId);
+            throw;
+        }
     }
 
-    public async Task<IEnumerable<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId)
+    public async Task<List<Transaction>> GetRotatingBudgetAsync(DateTime date, string userId)
     {
-        var mounth = date.Month;
-        var year = date.Year;
+        var userGuid = ParseUserId(userId);
+        var (startDate, endDate) = GetMonthRange(date);
 
-        var transactions = await _context.Transactions
-            .Where(t => t.Type == "Expense"
-            && t.Date.Month == date.Month && t.Date.Year == date.Year
-            && t.UserId.ToString().Equals(userId)
-            && t.IsFixed == false)
-            .ToListAsync();
+        try
+        {
+            return await _context.Transactions
+                    .Where(t => t.Type == "Expense"
+                     && t.Date >= startDate
+                     && t.Date < endDate
+                     && t.UserId == userGuid
+                     && t.IsFixed == false)
+                    .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting rotating budget for UserId: {UserId}", userId);
+            throw;
+        }
 
-        return transactions;
     }
 
     public async Task<decimal> GetTotalExpensesAsync(DateTime date, string userId)
     {
-        var mounth = date.Month;
-        var year = date.Year;
-        var amount = await _context.Transactions
-            .Where(t => t.Type == "Expense" && t.Date.Month == date.Month && t.Date.Year == date.Year
-            && t.UserId.ToString().Equals(userId))
-            .SumAsync(t => t.Amount);
+        var userGuid = ParseUserId(userId);
+        var (startDate, endDate) = GetMonthRange(date);
 
-        return amount;
+        try
+        {
+            return await _context.Transactions
+                    .Where(t => t.Type == "Expense"
+                    && t.Date >= startDate
+                    && t.Date < endDate
+                    && t.UserId == userGuid)
+                    .SumAsync(t => t.Amount);
+        }
+
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting total expense for UserId: {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task<bool> DeleteTransactionAsync(string id)
+    {
+        var userGuid = ParseUserId(id);
+
+        var item = await _context.Transactions.FindAsync(userGuid);
+        if (item == null)
+        {
+            return false;
+        }
+        try
+        {
+            _context.Transactions.Remove(item);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting transaction with Id: {Id}", id);
+            throw;
+        }
+    }
+
+    private Guid ParseUserId(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid))
+            throw new ArgumentException("Invalid userId", nameof(userId));
+        return guid;
+    }
+
+    private (DateTime Start, DateTime End) GetMonthRange(DateTime date)
+    {
+        var start = new DateTime(date.Year, date.Month, 1);
+        return (start, start.AddMonths(1));
     }
 }

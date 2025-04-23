@@ -31,8 +31,8 @@ public class UserRepositoryTests
         var user = new User { Email = "test@example.com", Password = "MyPass123" };
 
         //Act
-        var result = await _repo.Register(user);
-        var savedUser = await _repo.GetUserByEmail("test@example.com");
+        var result = await _repo.RegisterAsync(user);
+        var savedUser = await _repo.GetUserByEmailAsync("test@example.com");
 
         //Assert
         Assert.True(result);
@@ -44,11 +44,11 @@ public class UserRepositoryTests
     public async Task GetAll_ShouldReturnAllUsers()
     {
         //Arrange
-        await _repo.Register(new User { Email = "a@b.com", Password = "123" });
-        await _repo.Register(new User { Email = "b@c.com", Password = "123" });
+        await _repo.RegisterAsync(new User { Email = "a@b.com", Password = "123" });
+        await _repo.RegisterAsync(new User { Email = "b@c.com", Password = "123" });
 
         //Act
-        var users = await _repo.GetAll();
+        var users = await _repo.GetAsync();
 
         //Assert
         Assert.Equal(2, users.Count);
@@ -58,10 +58,10 @@ public class UserRepositoryTests
     public async Task GetUserByEmail_ShouldReturnCorrectUser()
     {
         //Arrange
-        await _repo.Register(new User { Email = "email@host.com", Password = "123" });
+        await _repo.RegisterAsync(new User { Email = "email@host.com", Password = "123" });
 
         //Act
-        var user = await _repo.GetUserByEmail("email@host.com");
+        var user = await _repo.GetUserByEmailAsync("email@host.com");
 
         //Assert
         Assert.NotNull(user);

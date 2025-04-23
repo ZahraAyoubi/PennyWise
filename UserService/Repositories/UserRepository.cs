@@ -1,143 +1,83 @@
-﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.IRepositories;
 using UserService.Models;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace UserService.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly UserDbContext _context;
-    public UserRepository(UserDbContext context)
+    private readonly IPasswordHasher<User> _passwordHasher;
+    public UserRepository(UserDbContext context, IPasswordHasher<User> passwordHasher)
     {
         _context = context;
+        _passwordHasher = passwordHasher;
     }
 
-    public async Task<List<User>> GetAll()
-    {
-        var user = await _context.Users.ToListAsync();
+    public async Task<List<User>> GetAsync(CancellationToken ct = default) =>
+        await _context.Users.ToListAsync(ct);
+   
 
-        return user;
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email must be provided.", nameof(email));
+
+        return await _context.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Email == email, ct);
     }
 
-    public async Task<User> GetUserByEmail(string email)
+    public async Task<User> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.Where(u => u.Email.Equals(email)).FirstOrDefaultAsync();
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required", nameof(email));
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password is required", nameof(password));
 
-        return user;
-    }
+        var user = await _context.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
 
-    public async Task<User> Login(string email, string password)
-    {
-        //try
-        //{
-        //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
-        //    if (user == null) return null;
-
-        //    var hashedInput = HashedPassword(password);
-
-        //    if (hashedInput == user.PasswordHash)
-        //    {
-        //        return user;
-        //    }
-
-        //    return null;
-        //}
-        //catch (Exception ex)
-        //{
-        //    throw new ApplicationException("An error occurred while trying to log in.", ex);
-        //}
-        try
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null) return null;
-
-            if (VerifyPassword(password, user.PasswordHash, user.Salt))
-            {
-                return user;
-            }
-
+        if (user == null)
             return null;
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException("An error occurred while trying to log in.", ex);
-        }
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+        if (result == PasswordVerificationResult.Success)
+            return user;
+
+        return user;
     }
 
-    public async Task<bool> Register(User user)
+    public async Task<User> RegisterAsync(User user, CancellationToken cancellationToken = default)
     {
-        //string hashedPassword = HashedPassword(user.Password);
-        //user.PasswordHash = hashedPassword;
-        //user.CreatedAt = DateTime.UtcNow;
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+        if (string.IsNullOrWhiteSpace(user.Email))
+            throw new ArgumentException("Email is required.", nameof(user.Email));
+        if (string.IsNullOrWhiteSpace(user.Password))
+            throw new ArgumentException("Password is required.", nameof(user.Password));
 
-        //await _context.Users.AddAsync(user);
-        //await _context.SaveChangesAsync();
+        // ensure no duplicates
+        var exists = await _context.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.Email == user.Email, cancellationToken);
+        if (exists)
+            throw new InvalidOperationException("Email is already registered.");
 
-        //return true;
-
-        // Generate a random salt
-        var salt = GenerateSalt();
-
-        // Hash the password with the salt
-        string hashedPassword = HashPasswordWithSalt(user.Password, salt);
-
-        // Set properties
-        user.PasswordHash = hashedPassword;
-        user.Salt = salt;
+        // hash the password
+        user.PasswordHash = _passwordHasher.HashPassword(user, user.Password);       
         user.CreatedAt = DateTime.UtcNow;
 
-        // Store in DB
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        // persist
+        await _context.Users.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        return true;
-    }
+        // clear plaintext password before returning
+        user.Password = null;
 
-
-    private string HashedPassword(string password)
-    {
-        byte[] salt = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(salt);
-        }
-        return Convert.ToBase64String(KeyDerivation.Pbkdf2(
-            password: password,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA256,
-            iterationCount: 100000,
-            numBytesRequested: 32));
-    }
-
-    private bool VerifyPassword(string password, string storedHash, string storedSalt)
-    {
-        var hashedInput = HashPasswordWithSalt(password, storedSalt);
-        return CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(hashedInput),
-            Encoding.UTF8.GetBytes(storedHash)
-        );
-    }
-
-    public static string HashPasswordWithSalt(string password, string salt)
-    {
-        var saltBytes = Encoding.UTF8.GetBytes(salt);
-        var passwordBytes = Encoding.UTF8.GetBytes(password);
-
-        using var pbkdf2 = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 100000, HashAlgorithmName.SHA256);
-        var hashBytes = pbkdf2.GetBytes(32); // 256-bit hash
-
-        return Convert.ToBase64String(hashBytes);
-    }
-
-    private string GenerateSalt(int size = 32)
-    {
-        var rng = new RNGCryptoServiceProvider();
-        var buffer = new byte[size];
-        rng.GetBytes(buffer);
-        return Convert.ToBase64String(buffer);
+        return user;
     }
 }

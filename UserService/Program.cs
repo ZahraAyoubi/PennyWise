@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 using UserService.Data;
 using UserService.IRepositories;
 using UserService.IServices;
+using UserService.Models;
 using UserService.Repositories;
 using UserService.Services;
 
@@ -23,6 +25,7 @@ builder.Services.AddControllers();
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Configure SQL database context
 builder.Services.AddDbContext<UserDbContext>(options =>

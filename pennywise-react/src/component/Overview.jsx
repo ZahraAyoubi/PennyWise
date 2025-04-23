@@ -6,6 +6,7 @@ import '../TotalExpense.css';
 import '../Overview.css'
 
 const Overview = () => {
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [income, setIncome] = useState(0);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [showProfile, setShowProfile] = useState(false);
@@ -32,13 +33,21 @@ const Overview = () => {
         }
     };
 
-    const handleDeleteRotatingItem = async (itemId) => {
+
+    const handleTransactionChange = () => {
+        setRefreshTrigger(prev => prev + 1); // triggers re-render on change
+    };
+
+    const handleDeleteRotatingItem = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5259/api/transactions/DeleteRotatingBudget/${itemId}`, { method: "DELETE" });
-            if (!response.ok) throw new Error(`Error deleting item: ${response.status}`);
-            fetchData();
-        } catch (error) {
-            console.error("Error deleting item:", error);
+            const response = await fetch(`http://localhost:5259/api/transactions/DeleteRotatingBudget/${id}`, { method: "DELETE" });
+            if (response.ok) {
+                fetchData();
+                handleTransactionChange();
+            }
+        }
+        catch (error) {
+            console.error("Error deleting item:", response.status);
         }
     };
 
@@ -65,9 +74,8 @@ const Overview = () => {
                 console.error("Error parsing stored user:", error);
                 setUser(null);
             }
-            fetchData();
         }
-    }, []);
+    }, [userId]);
 
     const handleLogout = async () => {
         try {
@@ -85,11 +93,12 @@ const Overview = () => {
         <div className="app">
             <Header onLogout={handleLogout} user={user} showProfile={showProfile} setShowProfile={setShowProfile} profile={profile} />
             <Dashboard
+                refreshTrigger={refreshTrigger}
+                onRefresh={handleTransactionChange}
                 income={income}
                 date={date}
                 setDate={setDate}
                 onDelete={handleDeleteRotatingItem}
-                fetchData={fetchData}
                 user={user}
             />
         </div>
