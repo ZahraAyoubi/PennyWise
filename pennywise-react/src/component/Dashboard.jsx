@@ -9,7 +9,7 @@ const Dashboard = ({ income, date, setDate, onDelete, user, refreshTrigger , onR
 
     return (
         <div className="dashboard">
-            <IncomeOverview  income={income} date={date} user={user} onDelete={onDelete} refreshTrigger={refreshTrigger} />
+            <IncomeOverview income={income} date={date} user={user} onDelete={onDelete} refreshTrigger={refreshTrigger} onRefresh={onRefresh} />
             <RotatingBudgetList onDelete={onDelete} date={date} user={user} refreshTrigger={refreshTrigger} />
             <FixedBudget user={user} onDelete={onDelete} refreshTrigger={refreshTrigger} onRefresh={onRefresh} />
             <AddTransaction  user={user} onRefresh={onRefresh} />

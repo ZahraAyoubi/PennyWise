@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import '../Income.css';
 
-const Income = ({ income, date, user }) => {
+const Income = ({ income, date, user, refreshTrigger, onRefresh  }) => {
     if (!user) {
         console.error("User is null in Income");
     }
@@ -28,7 +28,7 @@ const Income = ({ income, date, user }) => {
         };
 
         fetchCurrentIncome();
-    }, [date]);
+    }, [refreshTrigger]);
 
     const handleSave = async () => {
         setIsEditing(false);
@@ -42,6 +42,7 @@ const Income = ({ income, date, user }) => {
                 },
                 body: JSON.stringify({ amount, description, date, userId }),
             });
+            onRefresh();
 
         } catch (error) {
             console.error('Error saving income:', error);
@@ -80,6 +81,8 @@ const Income = ({ income, date, user }) => {
 };
 
 Income.propTypes = {
+    refreshTrigger: PropTypes.number.isRequired,
+    onRefresh: PropTypes.func.isRequired,
     income: PropTypes.number.isRequired,
     date: PropTypes.string.isRequired,
     user: PropTypes.object

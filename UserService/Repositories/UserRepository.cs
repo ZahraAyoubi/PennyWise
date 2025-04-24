@@ -16,18 +16,18 @@ public class UserRepository : IUserRepository
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<List<User>> GetAsync(CancellationToken ct = default) =>
-        await _context.Users.ToListAsync(ct);
+    public async Task<List<User>> GetAsync(CancellationToken cancellationToken = default) =>
+        await _context.Users.ToListAsync(cancellationToken);
    
 
-    public async Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email must be provided.", nameof(email));
 
         return await _context.Users
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Email == email, ct);
+            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
     public async Task<User> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -60,22 +60,18 @@ public class UserRepository : IUserRepository
         if (string.IsNullOrWhiteSpace(user.Password))
             throw new ArgumentException("Password is required.", nameof(user.Password));
 
-        // ensure no duplicates
         var exists = await _context.Users
             .AsNoTracking()
             .AnyAsync(u => u.Email == user.Email, cancellationToken);
         if (exists)
             throw new InvalidOperationException("Email is already registered.");
 
-        // hash the password
         user.PasswordHash = _passwordHasher.HashPassword(user, user.Password);       
         user.CreatedAt = DateTime.UtcNow;
 
-        // persist
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // clear plaintext password before returning
         user.Password = null;
 
         return user;

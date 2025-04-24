@@ -16,8 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedLibraries", "SharedLi
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "Frontend\frontend.esproj", "{462EE049-9FE1-B47D-1B3E-22BACA5D9185}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Tests", "UserService.Tests\UserService.Tests.csproj", "{3200A4C7-62BB-4B24-B7A3-675616499B9A}"
 EndProject
 Global
@@ -44,12 +42,6 @@ Global
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E7B5C50-41F4-46A9-9E20-A9D626FBF0F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.Build.0 = Release|Any CPU
-		{462EE049-9FE1-B47D-1B3E-22BACA5D9185}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{3200A4C7-62BB-4B24-B7A3-675616499B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3200A4C7-62BB-4B24-B7A3-675616499B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3200A4C7-62BB-4B24-B7A3-675616499B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU

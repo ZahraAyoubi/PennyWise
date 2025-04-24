@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using UserService.Data;
 using UserService.Models;
@@ -10,6 +11,7 @@ public class UserRepositoryTests
 {
     private readonly Mock<UserDbContext> _mockContext;
     private readonly UserRepository _repo;
+    private readonly IPasswordHasher<User> _passwordHasher;
 
     public UserRepositoryTests()
     {
@@ -20,8 +22,9 @@ public class UserRepositoryTests
         var context = new UserDbContext(options);
 
         _mockContext = new Mock<UserDbContext>(options);
+        _passwordHasher = new PasswordHasher<User>();
 
-        _repo = new UserRepository(context);
+        _repo = new UserRepository(context, _passwordHasher);
     }
 
     [Fact]
@@ -35,8 +38,7 @@ public class UserRepositoryTests
         var savedUser = await _repo.GetUserByEmailAsync("test@example.com");
 
         //Assert
-        Assert.True(result);
-        Assert.NotNull(savedUser);
+        Assert.NotNull(result);
         Assert.NotEqual("MyPass123", savedUser.PasswordHash); // ensure password was hashed
     }
 

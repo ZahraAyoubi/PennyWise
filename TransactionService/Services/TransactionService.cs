@@ -19,12 +19,12 @@ public class TransactionService : ITransactionService
 
     public async Task<Transaction> AddIncomeAsync(Transaction transaction)
     {
-        return await _repository.AddIncomeAsync(transaction);
+        return await _repository.AddTransactionAsync(transaction);
     }
 
     public async Task<Transaction> AddTransactionAsync(Transaction transaction)
     {
-        return await _repository.AddIncomeAsync(transaction);
+        return await _repository.AddTransactionAsync(transaction);
     }
 
     public async Task<bool> DeleteTransactionAsync(string id)

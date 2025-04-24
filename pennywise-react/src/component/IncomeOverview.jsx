@@ -1,21 +1,21 @@
-import { useEffect, useState } from "react";
+/*import { useEffect, useState } from "react";*/
 import Income from "./Income";
 import RemainingBudget from "./RemainingBudget"
 import TotalExpense from "./TotalExpense"
 import PropTypes from "prop-types";
 
-const IncomeOverview = ({ income: initialIncome, date, user, onDelete, refreshTrigger }) => {
+const IncomeOverview = ({ income, date, user, onDelete, refreshTrigger, onRefresh }) => {
 
-    const [income, setIncome] = useState(initialIncome);
+    //const [income, setIncome] = useState(initialIncome);
 
-    useEffect(() => {
-        setIncome(initialIncome);
-    }, [initialIncome])
+    //useEffect(() => {
+    //    setIncome(initialIncome);
+    //}, [initialIncome])
     
     return (
         <div className="card overview">
             <h2>Income</h2>
-            <Income income={income} date={date} user={user } />
+            <Income income={income} date={date} user={user} refreshTrigger={refreshTrigger} onRefresh={onRefresh} />
             <h2>Total Expenses</h2>
             <TotalExpense date={date} user={user} refreshTrigger={refreshTrigger} />
             <h2>Remaining Budget</h2>
@@ -30,6 +30,7 @@ IncomeOverview.propTypes = {
     date: PropTypes.string.isRequired,
     user: PropTypes.object,
     refreshTrigger: PropTypes.number.isRequired,
+    onRefresh: PropTypes.func.isRequired,
 };
 
 export default IncomeOverview;

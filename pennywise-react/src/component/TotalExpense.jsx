@@ -22,7 +22,7 @@ const TotalExpense = ({  date, user, refreshTrigger }) => {
         };
 
         fetchTotalExpens();
-    }, [refreshTrigger]); 
+    }, [refreshTrigger, date, userId]); 
 
     return (
             <div className="value">

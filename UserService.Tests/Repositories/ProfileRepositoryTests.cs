@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using UserService.Data;
 using UserService.Models;
@@ -11,6 +12,7 @@ public class ProfileRepositoryTests
     private readonly Mock<UserDbContext> _mockContext;
     private readonly ProfileRepository _profilRrepo;
     private readonly UserRepository _userRepo;
+    private readonly IPasswordHasher<User> _passwordHasher;
 
     public ProfileRepositoryTests()
     {
@@ -23,13 +25,14 @@ public class ProfileRepositoryTests
         _mockContext = new Mock<UserDbContext>(options);
 
         _profilRrepo = new ProfileRepository(context);
-        _userRepo = new UserRepository(context);
+        _passwordHasher = new PasswordHasher<User>();
+        _userRepo = new UserRepository(context, _passwordHasher);
     }
 
     [Fact]
     public async Task CreateProfile_ShouldAddProfile()
     {
-        var user = new User { Email = "new@user.com" };
+        var user = new User { Email = "new@user.com", Password= "123" };
         await _userRepo.RegisterAsync(user); // add user
 
         var result = await _profilRrepo.CreateProfileAsync(user);
