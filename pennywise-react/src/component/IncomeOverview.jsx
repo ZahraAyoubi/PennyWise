@@ -1,16 +1,9 @@
-/*import { useEffect, useState } from "react";*/
 import Income from "./Income";
 import RemainingBudget from "./RemainingBudget"
 import TotalExpense from "./TotalExpense"
 import PropTypes from "prop-types";
 
 const IncomeOverview = ({ income, date, user, onDelete, refreshTrigger, onRefresh }) => {
-
-    //const [income, setIncome] = useState(initialIncome);
-
-    //useEffect(() => {
-    //    setIncome(initialIncome);
-    //}, [initialIncome])
     
     return (
         <div className="card overview">

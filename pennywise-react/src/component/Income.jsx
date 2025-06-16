@@ -22,13 +22,14 @@ const Income = ({ income, date, user, refreshTrigger, onRefresh  }) => {
                 console.log(response);
                 const data = await response.json();
                 setAmount(data);
+                console.log("data:", data)
             } catch (error) {
                 console.error('Error fetching income:', error);
             }
         };
 
         fetchCurrentIncome();
-    }, [refreshTrigger]);
+    }, [refreshTrigger, , date, userId]);
 
     const handleSave = async () => {
         setIsEditing(false);

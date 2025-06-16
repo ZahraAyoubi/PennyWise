@@ -9,7 +9,7 @@ namespace UserService.Test.Repositories;
 
 public class UserRepositoryTests
 {
-    private readonly Mock<UserDbContext> _mockContext;
+    private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
     private readonly UserRepository _repo;
     private readonly IPasswordHasher<User> _passwordHasher;
 
@@ -21,20 +21,31 @@ public class UserRepositoryTests
 
         var context = new UserDbContext(options);
 
-        _mockContext = new Mock<UserDbContext>(options);
+        var store = new Mock<IUserStore<ApplicationUser>>();
+        _mockUserManager = new Mock<UserManager<ApplicationUser>>(
+            store.Object, null, null, null, null, null, null, null, null);
+
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+    .ReturnsAsync(IdentityResult.Success);
+        _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync((string email) => new ApplicationUser { Email = email });
+
+
         _passwordHasher = new PasswordHasher<User>();
 
-        _repo = new UserRepository(context, _passwordHasher);
+        _repo = new UserRepository(context, _passwordHasher, _mockUserManager.Object);
     }
 
     [Fact]
     public async Task Register_ShouldAddUserWithHashedPassword()
     {
         //Arrange
-        var user = new User { Email = "test@example.com", Password = "MyPass123" };
+        var user = new ApplicationUser { Email = "test@example.com" };
+
+        string password = "MyPass123";
 
         //Act
-        var result = await _repo.RegisterAsync(user);
+        var result = await _repo.RegisterAsync(user, password);
         var savedUser = await _repo.GetUserByEmailAsync("test@example.com");
 
         //Assert
@@ -46,21 +57,27 @@ public class UserRepositoryTests
     public async Task GetAll_ShouldReturnAllUsers()
     {
         //Arrange
-        await _repo.RegisterAsync(new User { Email = "a@b.com", Password = "123" });
-        await _repo.RegisterAsync(new User { Email = "b@c.com", Password = "123" });
+        var users = new List<ApplicationUser>
+        {
+            new ApplicationUser { Email = "test1@example.com" },
+            new ApplicationUser { Email = "test2@example.com" }
+        }.AsQueryable();
+
+        _mockUserManager.Setup(m => m.Users).Returns(users);
 
         //Act
-        var users = await _repo.GetAsync();
+        var result = await _repo.GetAsync();
 
         //Assert
-        Assert.Equal(2, users.Count);
+        Assert.Equal(2, result.Count);
     }
 
     [Fact]
     public async Task GetUserByEmail_ShouldReturnCorrectUser()
     {
         //Arrange
-        await _repo.RegisterAsync(new User { Email = "email@host.com", Password = "123" });
+        string password = "123";
+        await _repo.RegisterAsync(new ApplicationUser { Email = "email@host.com" }, password);
 
         //Act
         var user = await _repo.GetUserByEmailAsync("email@host.com");

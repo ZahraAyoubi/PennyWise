@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Microsoft.Identity.Client;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 

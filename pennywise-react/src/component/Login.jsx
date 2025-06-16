@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import '../App.css'
+import '../App.css';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -45,7 +45,7 @@ const Login = () => {
             </div>
 
             <p >
-                <Link to="/forgot-password" className="text-blue-500">Forgot Password</Link>
+                <Link to="/forgotpassword"  className="text-blue-500">Forgot Password</Link>
             </p>
             <p>
                 <Link to="/register" className="text-blue-500">Create Account</Link>

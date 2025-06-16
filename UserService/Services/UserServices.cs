@@ -1,4 +1,5 @@
-﻿using UserService.IRepositories;
+﻿using Microsoft.AspNetCore.Identity;
+using UserService.IRepositories;
 using UserService.IServices;
 using UserService.Models;
 
@@ -13,15 +14,16 @@ public class UserServices : IUserServices
     {
         _userRepo = userRepo;
         _profileRepo = profileRepo;
+
     }
 
-    public async Task<User> Login(string email, string password)=>
+    public async Task<ApplicationUser> Login(string email, string password)=>
         await _userRepo.LoginAsync(email, password);
 
-    public async Task<List<User>> GetAll() =>
+    public async Task<List<ApplicationUser>> GetAll() =>
         await _userRepo.GetAsync();
 
-    public async Task<User> Register(User user)
+    public async Task<ApplicationUser> Register(ApplicationUser user, string password)
     {
        if (user == null)
         {
@@ -36,10 +38,41 @@ public class UserServices : IUserServices
 
         user.Email = user.Email.ToLower();
 
-        await _userRepo.RegisterAsync(user);
+        await _userRepo.RegisterAsync(user, password);
 
         await _profileRepo.CreateProfileAsync(user);
 
         return user;
+    }
+
+    public async Task<ApplicationUser> FindUserByEmail(ApplicationUser user)
+    {
+        if (user == null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        var existingUser = await _userRepo.GetUserByEmailAsync(user.Email.ToLower());
+        if (existingUser != null)
+        {
+            return null;
+        }
+
+        return existingUser;
+    }
+
+    public Task<ApplicationUser> SendEmailAsync(ApplicationUser user, string password, string message)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<string> GenerateResetToken(ApplicationUser user)
+    {
+        if (user == null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        return _userRepo.GeneratePasswordResetTokenAsync(user.Email);
     }
 }

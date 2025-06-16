@@ -4,76 +4,113 @@ using UserService.IRepositories;
 using UserService.Models;
 using Microsoft.AspNetCore.Identity;
 
+
 namespace UserService.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly UserDbContext _context;
     private readonly IPasswordHasher<User> _passwordHasher;
-    public UserRepository(UserDbContext context, IPasswordHasher<User> passwordHasher)
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public UserRepository(UserDbContext context,
+                          IPasswordHasher<User> passwordHasher,
+                          UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _passwordHasher = passwordHasher;
+        _userManager = userManager;
     }
 
-    public async Task<List<User>> GetAsync(CancellationToken cancellationToken = default) =>
-        await _context.Users.ToListAsync(cancellationToken);
-   
+    public async Task<List<ApplicationUser>> GetAsync()
+    {
+        var query = _userManager.Users;
 
-    public async Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+        if (query is IAsyncEnumerable<ApplicationUser>)
+        {
+            return await query.AsNoTracking().ToListAsync();
+        }
+
+        return query.ToList();
+    }
+
+    public async Task<ApplicationUser> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email must be provided.", nameof(email));
 
-        return await _context.Users
-            .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        return await _userManager.FindByEmailAsync(email);
     }
 
-    public async Task<User> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<ApplicationUser> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required", nameof(email));
         if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Password is required", nameof(password));
 
-        var user = await _context.Users
-            .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        //var user = await _userManager.Users
+        //    .AsNoTracking()
+        //    .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+        var user = await _userManager.FindByEmailAsync(email);
 
         if (user == null)
             return null;
 
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-        if (result == PasswordVerificationResult.Success)
-            return user;
+        //var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+        //if (result == PasswordVerificationResult.Success)
+        //    return user;
 
         return user;
     }
 
-    public async Task<User> RegisterAsync(User user, CancellationToken cancellationToken = default)
+    //public async Task<ApplicationUser> RegisterAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
+    //{
+    //    if (user == null)
+    //        throw new ArgumentNullException(nameof(user));
+    //    if (string.IsNullOrWhiteSpace(user.Email))
+    //        throw new ArgumentException("Email is required.", nameof(user.Email));
+    //    if (string.IsNullOrWhiteSpace(password))
+    //        throw new ArgumentException("Password is required.", nameof(password));
+
+    //    var exists = await _context.Users
+    //        .AsNoTracking()
+    //        .AnyAsync(u => u.Email == user.Email, cancellationToken);
+    //    if (exists)
+    //        throw new InvalidOperationException("Email is already registered.");
+
+    //    //user.PasswordHash = _passwordHasher.HashPassword(user, password);       
+    //    //user.CreatedAt = DateTime.UtcNow;
+
+    //    await _context.Users.AddAsync(user, cancellationToken);
+    //    await _context.SaveChangesAsync(cancellationToken);
+
+    //    return user;
+    //}
+
+    public async Task<ApplicationUser> RegisterAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
-        if (string.IsNullOrWhiteSpace(user.Email))
-            throw new ArgumentException("Email is required.", nameof(user.Email));
-        if (string.IsNullOrWhiteSpace(user.Password))
-            throw new ArgumentException("Password is required.", nameof(user.Password));
+        var result = await _userManager.CreateAsync(user, password);
 
-        var exists = await _context.Users
-            .AsNoTracking()
-            .AnyAsync(u => u.Email == user.Email, cancellationToken);
-        if (exists)
-            throw new InvalidOperationException("Email is already registered.");
-
-        user.PasswordHash = _passwordHasher.HashPassword(user, user.Password);       
-        user.CreatedAt = DateTime.UtcNow;
-
-        await _context.Users.AddAsync(user, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        user.Password = null;
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
 
         return user;
+    }
+
+    public async Task<string> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
+        if (user == null) return null;
+
+        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        //user.PasswordResetToken = token;
+        //user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+
+        await _context.SaveChangesAsync();
+        return token;
     }
 }

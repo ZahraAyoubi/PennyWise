@@ -4,8 +4,9 @@ namespace UserService.IRepositories;
 
 public interface IUserRepository
 {
-    Task<User> RegisterAsync(User user, CancellationToken cancellationToken = default);  
-    Task<List<User>> GetAsync(CancellationToken cancellationToken = default);
-    Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
-    Task<User> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
+    Task<ApplicationUser> RegisterAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default);  
+    Task<List<ApplicationUser>> GetAsync();
+    Task<ApplicationUser> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<ApplicationUser> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
+    Task<string> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default);
 }

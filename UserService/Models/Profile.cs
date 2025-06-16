@@ -9,7 +9,7 @@ public class Profile
     public Guid Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public User User { get; set; }
+    public ApplicationUser User { get; set; }
     public string Role { get; set; }
     public string Author {  get; set; }
 }

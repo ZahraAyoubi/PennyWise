@@ -3,6 +3,7 @@ import Login from "./component/Login";
 import Register from "./component/Register";
 import Overview from "./component/Overview";
 import EditProfile from "./component/EditProfile";
+import ForgotPassword from "./component/ForgotPassword";
 
 function App() {
     return (
@@ -13,6 +14,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/overview" element={<Overview />} />
                 <Route path="/editprofile" element={<EditProfile />} />
+                <Route path="/forgotpassword" element={<ForgotPassword />} />
             </Routes>
         </Router>
     );

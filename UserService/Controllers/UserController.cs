@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UserService.IServices;
 using UserService.Models;
@@ -18,9 +19,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] User user)
+    [Route("Register/{password}")]
+    public async Task<IActionResult> Register([FromBody] ApplicationUser user, string password)
     {
-        await _userService.Register(user);
+        await _userService.Register(user, password);
         return Ok(new { message = "User registered successfully" });
     }
 
@@ -38,5 +40,25 @@ public class UserController : ControllerBase
     {
         Response.Cookies.Delete("user");
         return Ok(new { message = "Logged out successfully" });
+    }
+
+    [HttpPost("send-reset-link")]
+    public async Task<IActionResult> SendResetLink([FromBody] ApplicationUser request)
+    {
+        var user = await _userService.FindUserByEmail(request);
+        if (user == null)
+            return Ok(); // Don't reveal user existence
+
+        var token = await _userService.GenerateResetToken(request);
+        var resetLink = Url.Action("ResetPassword", "Account", new
+        {
+            token,
+            email = request.Email
+        }, Request.Scheme);
+
+        var message = $"Click the link to reset your password: {resetLink}";
+        await _userService.SendEmailAsync(request, "Reset Your Password", message);
+
+        return Ok();
     }
 }

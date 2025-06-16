@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import '../App.css'
 
-function Register () {
+function Register() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
@@ -11,14 +13,17 @@ function Register () {
     const [emailError, setEmailError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    
 
     const handleRegister = async () => {
-            const response = await fetch("http://localhost:5046/api/user", {
+        const username = email;
+
+        const response = await fetch(`http://localhost:5046/api/user/register/${encodeURIComponent(password)}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password, name, passwordConfirmed, phone }),
+            },
+            body: JSON.stringify({ email, name, phone, username }),
             });
             
         if (response.ok) {
@@ -54,6 +59,10 @@ function Register () {
         }
     }
 
+    const handleCancel = () => {
+        navigate("/");
+    };
+
     return (
         <div className="app" >
             <h2 className="header">Register</h2>
@@ -79,6 +88,8 @@ function Register () {
                     <button onClick={handleRegister} className="add-button" >Register</button>
                     {successMessage && <p data-testid="success-message" className="success">{successMessage}</p>}
                     {errorMessage && <p data-testid="error-message" className="error">{errorMessage}</p>}
+
+                    <button className="btn-red" onClick={handleCancel} >Cancel</button>
                 </p>
             </div>
         </div>

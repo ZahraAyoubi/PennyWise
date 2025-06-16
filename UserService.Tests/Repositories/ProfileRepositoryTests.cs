@@ -9,10 +9,9 @@ namespace UserService.Test.Repositories;
 
 public class ProfileRepositoryTests
 {
-    private readonly Mock<UserDbContext> _mockContext;
-    private readonly ProfileRepository _profilRrepo;
+    private readonly UserDbContext _context;
+    private readonly ProfileRepository _profileRepo;
     private readonly UserRepository _userRepo;
-    private readonly IPasswordHasher<User> _passwordHasher;
 
     public ProfileRepositoryTests()
     {
@@ -20,24 +19,36 @@ public class ProfileRepositoryTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        var context = new UserDbContext(options);
+        _context = new UserDbContext(options);
 
-        _mockContext = new Mock<UserDbContext>(options);
+        // Setup mock UserManager
+        var store = new Mock<IUserStore<ApplicationUser>>();
+        var mockUserManager = new Mock<UserManager<ApplicationUser>>(
+            store.Object, null, null, null, null, null, null, null, null
+        );
 
-        _profilRrepo = new ProfileRepository(context);
-        _passwordHasher = new PasswordHasher<User>();
-        _userRepo = new UserRepository(context, _passwordHasher);
+        mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+        mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync((string email) => new ApplicationUser { Email = email });
+
+        var passwordHasher = new PasswordHasher<User>();
+
+        _userRepo = new UserRepository(_context, passwordHasher, mockUserManager.Object);
+        _profileRepo = new ProfileRepository(_context);
     }
+
 
     [Fact]
     public async Task CreateProfile_ShouldAddProfile()
     {
-        var user = new User { Email = "new@user.com", Password= "123" };
-        await _userRepo.RegisterAsync(user); // add user
+        string password = "123";
+        var user = new ApplicationUser { Email = "new@user.com" };
+        await _userRepo.RegisterAsync(user, password); // add user
 
-        var result = await _profilRrepo.CreateProfileAsync(user);
+        var result = await _profileRepo.CreateProfileAsync(user);
 
-        var profile = await _profilRrepo.GetProfileByEmailAsync("new@user.com");
+        var profile = await _profileRepo.GetProfileByEmailAsync("new@user.com");
 
         Assert.True(result);
         Assert.NotNull(profile);

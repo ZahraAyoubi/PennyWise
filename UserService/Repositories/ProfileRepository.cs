@@ -13,7 +13,7 @@ public class ProfileRepository : IProfileRepository
         _context = context;
     }
 
-    public async Task<bool> CreateProfileAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<bool> CreateProfileAsync(ApplicationUser user, CancellationToken cancellationToken = default)
     {
         var profile = new Profile
         {
