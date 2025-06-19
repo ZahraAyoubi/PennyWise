@@ -3,6 +3,7 @@ using UserService.Data;
 using UserService.IRepositories;
 using UserService.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 
 
 namespace UserService.Repositories;
@@ -42,52 +43,21 @@ public class UserRepository : IUserRepository
         return await _userManager.FindByEmailAsync(email);
     }
 
-    public async Task<ApplicationUser> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<ApplicationUser> LoginAsync(LoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ArgumentException("Email is required", nameof(email));
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("Password is required", nameof(password));
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new ArgumentException("Email is required", nameof(request.Email));
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new ArgumentException("Password is required", nameof(request.Password));
 
-        //var user = await _userManager.Users
-        //    .AsNoTracking()
-        //    .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        var user =await _userManager.FindByEmailAsync(request.Email);
+        var result = await _userManager.CheckPasswordAsync(user, request.Password);
 
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
+        if (result == false)
             return null;
-
-        //var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-        //if (result == PasswordVerificationResult.Success)
-        //    return user;
 
         return user;
     }
-
-    //public async Task<ApplicationUser> RegisterAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
-    //{
-    //    if (user == null)
-    //        throw new ArgumentNullException(nameof(user));
-    //    if (string.IsNullOrWhiteSpace(user.Email))
-    //        throw new ArgumentException("Email is required.", nameof(user.Email));
-    //    if (string.IsNullOrWhiteSpace(password))
-    //        throw new ArgumentException("Password is required.", nameof(password));
-
-    //    var exists = await _context.Users
-    //        .AsNoTracking()
-    //        .AnyAsync(u => u.Email == user.Email, cancellationToken);
-    //    if (exists)
-    //        throw new InvalidOperationException("Email is already registered.");
-
-    //    //user.PasswordHash = _passwordHasher.HashPassword(user, password);       
-    //    //user.CreatedAt = DateTime.UtcNow;
-
-    //    await _context.Users.AddAsync(user, cancellationToken);
-    //    await _context.SaveChangesAsync(cancellationToken);
-
-    //    return user;
-    //}
 
     public async Task<ApplicationUser> RegisterAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
     {
@@ -101,16 +71,16 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<string> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateResetTokenAsync(ApplicationUser user)
     {
-        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
-        if (user == null) return null;
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
+    }
 
-        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-        //user.PasswordResetToken = token;
-        //user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+    public async Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword)
+    {
 
-        await _context.SaveChangesAsync();
-        return token;
+       var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+        return result;
     }
 }

@@ -35,6 +35,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<UserDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 

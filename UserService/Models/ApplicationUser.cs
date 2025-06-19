@@ -5,5 +5,5 @@ namespace UserService.Models;
 
 public class ApplicationUser : IdentityUser
 {
-    public DbSet<User> Users { get; set; }
+    
 }

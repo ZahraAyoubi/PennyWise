@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UserService.IServices;
 using UserService.Models;
@@ -29,7 +28,7 @@ public class UserController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _userService.Login(request.Email, request.Password);
+        var user = await _userService.Login(request);
         if (user == null) return Unauthorized(new { message = "Invalid credentials" });
 
         return Ok(new { user });
@@ -45,20 +44,33 @@ public class UserController : ControllerBase
     [HttpPost("send-reset-link")]
     public async Task<IActionResult> SendResetLink([FromBody] ApplicationUser request)
     {
-        var user = await _userService.FindUserByEmail(request);
+        var user = await _userService.FindUserByEmail(request.Email);
         if (user == null)
-            return Ok(); // Don't reveal user existence
+            return Ok(); 
 
-        var token = await _userService.GenerateResetToken(request);
-        var resetLink = Url.Action("ResetPassword", "Account", new
-        {
-            token,
-            email = request.Email
-        }, Request.Scheme);
+        var token = await _userService.GenerateResetToken(user);
+
+        var resetLink = $"http://localhost:49222/resetpassword?token={Uri.EscapeDataString(token)}&email={request.Email}";
 
         var message = $"Click the link to reset your password: {resetLink}";
         await _userService.SendEmailAsync(request, "Reset Your Password", message);
 
         return Ok();
+    }
+
+    [HttpPost("resetpassword")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var user = await _userService.FindUserByEmail(request.Email);
+        if (user == null)
+            return Ok(); 
+
+         var result = await _userService.ResetPassword(user, request.ResetCode, request.NewPassword);
+
+        if (result.Succeeded)
+            return Ok(new { message = "Password reset successful" });
+
+        var error = result.Errors.FirstOrDefault()?.Description;
+        return BadRequest(new { message = error });
     }
 }
